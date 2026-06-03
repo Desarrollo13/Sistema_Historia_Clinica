@@ -1,0 +1,71 @@
+{% if turnos %}
+<div class="table-responsive">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th style="width:60px">Turno</th>
+        <th>Paciente</th>
+        <th>Motivo</th>
+        <th>Signos vitales</th>
+        <th>Hora</th>
+        <th>Estado</th>
+        <th class="text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-turnos">
+      {% for t in turnos %}
+      <tr class="turno-row {{ t.estado }}">
+        <td><span class="badge bg-secondary rounded-pill">#{{ t.numero }}</span></td>
+        <td><strong>{{ t.paciente.nombre_completo }}</strong></td>
+        <td>
+          {% if t.signos %}
+            {{ t.signos.motivo_consulta|truncatechars:50 }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if t.signos %}
+          <div class="d-flex gap-1 flex-wrap">
+            {% if t.signos.presion_sistolica %}
+              <span class="signo-pill"><strong>{{ t.signos.presion }}</strong> mmHg</span>
+            {% endif %}
+            {% if t.signos.temperatura %}
+              <span class="signo-pill"><strong>{{ t.signos.temperatura }}</strong>°C</span>
+            {% endif %}
+            {% if t.signos.saturacion_o2 %}
+              <span class="signo-pill"><strong>{{ t.signos.saturacion_o2 }}</strong>% O₂</span>
+            {% endif %}
+          </div>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td><span class="text-muted" style="font-size:.85rem">{{ t.fecha_hora|time:"H:i" }}</span></td>
+        <td>
+          <span class="badge badge-{{ t.estado }} rounded-pill">
+            {{ t.get_estado_display }}
+          </span>
+        </td>
+        <td class="text-center">
+          <div class="btn-group btn-group-sm">
+            <a href="/consulta/llamar/{{ t.pk }}/" class="btn btn-outline-primary" title="Llamar">
+              <i class="bi bi-megaphone"></i>
+            </a>
+            <a href="/consulta/iniciar/{{ t.pk }}/" class="btn btn-success">
+              <i class="bi bi-play-fill"></i> Atender
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted" id="tbody-turnos">
+  <i class="bi bi-check2-all" style="font-size:3rem;color:#1a7a4a"></i>
+  <h5 class="mt-3">Sin pacientes en espera</h5>
+  <p style="font-size:.88rem">La sala de espera está vacía. El panel se actualiza automáticamente.</p>
+</div>
+{% endif %}

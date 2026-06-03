@@ -1,0 +1,91 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Pacientes{% endblock %}
+{% block page_title %}<i class="bi bi-people me-2" style="color:#1a7a4a"></i>Pacientes{% endblock %}
+
+{% block topbar_actions %}
+  <a href="/pacientes/nuevo/" class="btn btn-primary btn-sm px-3">
+    <i class="bi bi-person-plus me-1"></i> Nuevo paciente
+  </a>
+{% endblock %}
+
+{% block contenido %}
+<div class="card">
+  <div class="card-body pb-0">
+    <form method="get" class="d-flex gap-2 mb-3">
+      <div class="input-group" style="max-width: 420px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="q" value="{{ query }}" class="form-control"
+               placeholder="Buscar por DNI, apellido o nombre…" autofocus>
+      </div>
+      <button class="btn btn-primary px-3" type="submit">Buscar</button>
+      {% if query %}
+        <a href="/pacientes/" class="btn btn-outline-secondary px-3">
+          <i class="bi bi-x"></i> Limpiar
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  {% if query and not pacientes %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-person-x" style="font-size:2.5rem"></i>
+    <p class="mt-2">No se encontraron pacientes para "<strong>{{ query }}</strong>"</p>
+    <a href="/pacientes/nuevo/" class="btn btn-primary">
+      <i class="bi bi-person-plus me-1"></i> Registrar nuevo paciente
+    </a>
+  </div>
+  {% elif not pacientes and not query %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-people" style="font-size:2.5rem"></i>
+    <p class="mt-2">No hay pacientes registrados aún.</p>
+    <a href="/pacientes/nuevo/" class="btn btn-primary">
+      <i class="bi bi-person-plus me-1"></i> Registrar primer paciente
+    </a>
+  </div>
+  {% else %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>DNI</th>
+          <th>Apellido y nombre</th>
+          <th>Edad</th>
+          <th>Obra social</th>
+          <th>Teléfono</th>
+          <th class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pacientes %}
+        <tr>
+          <td><code style="font-size:.88rem">{{ p.dni }}</code></td>
+          <td>
+            <span class="fw-semibold">{{ p.apellido }}, {{ p.nombre }}</span>
+          </td>
+          <td>{{ p.edad }} años</td>
+          <td>{{ p.obra_social|default:"—" }}</td>
+          <td>{{ p.telefono|default:"—" }}</td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <a href="/pacientes/{{ p.pk }}/" class="btn btn-outline-secondary" title="Ver ficha">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="/pacientes/{{ p.pk }}/signos/" class="btn btn-outline-primary" title="Tomar signos vitales">
+                <i class="bi bi-heart-pulse"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pacientes|length == 50 %}
+  <div class="card-footer text-muted text-center" style="font-size:.82rem">
+    Mostrando los primeros 50 resultados. Refine la búsqueda para ver más.
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

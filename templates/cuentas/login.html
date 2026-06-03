@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión — Sistema Clínico</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1b2a3b 0%, #1a4a2e 100%);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+    .logo-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a7a4a, #2196f3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .logo-circle i { color: #fff; font-size: 1.8rem; }
+    h4 { color: #1b2a3b; font-weight: 700; }
+    .subtitle { color: #888; font-size: .88rem; }
+    .form-label { font-size: .85rem; font-weight: 600; color: #444; }
+    .form-control {
+      border-radius: 10px; padding: 10px 14px;
+      border-color: #dde1e7; font-size: .92rem;
+    }
+    .form-control:focus {
+      border-color: #1a7a4a;
+      box-shadow: 0 0 0 3px rgba(26,122,74,.12);
+    }
+    .btn-login {
+      background: #1a7a4a; border: none; border-radius: 10px;
+      padding: 11px; font-size: .95rem; font-weight: 600;
+      width: 100%; color: #fff; margin-top: 6px;
+      transition: background .2s;
+    }
+    .btn-login:hover { background: #145f38; }
+    .input-group-text { border-radius: 10px 0 0 10px; background: #f8f9fb; border-color: #dde1e7; }
+    .net-info {
+      background: #f0f7f4; border-radius: 10px;
+      padding: 10px 14px; font-size: .8rem; color: #555;
+      margin-top: 20px;
+    }
+    .errorlist { list-style: none; padding: 0; }
+    .errorlist li { color: #dc3545; font-size: .83rem; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="text-center mb-4">
+      <div class="logo-circle"><i class="bi bi-heart-pulse-fill"></i></div>
+      <h4>Historia Clínica</h4>
+      <p class="subtitle mb-0">Sistema de gestión del consultorio</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger py-2 px-3" style="font-size:.85rem; border-radius:10px;">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      Usuario o contraseña incorrectos.
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person" style="color:#888"></i></span>
+          <input type="text" name="username" class="form-control" placeholder="Nombre de usuario"
+                 autocomplete="username" autofocus required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock" style="color:#888"></i></span>
+          <input type="password" name="password" class="form-control" placeholder="••••••••"
+                 autocomplete="current-password" required>
+        </div>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn-login">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar al sistema
+      </button>
+    </form>
+
+    <div class="net-info text-center">
+      <i class="bi bi-wifi me-1"></i>
+      Sistema en red local · Sin internet · Sin costos mensuales
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Facturación{% endblock %}
+{% block page_title %}<i class="bi bi-receipt me-2" style="color:#1a7a4a"></i>Facturación{% endblock %}
+
+{% block topbar_actions %}
+  <form class="d-flex align-items-center gap-2" method="get">
+    <label class="text-muted" style="font-size:.85rem">Fecha:</label>
+    <input type="date" name="fecha" value="{{ fecha }}" class="form-control form-control-sm"
+           style="width:160px" onchange="this.form.submit()">
+    {% if fecha != hoy %}
+    <a href="?" class="btn btn-outline-secondary btn-sm">Hoy</a>
+    {% endif %}
+  </form>
+{% endblock %}
+
+{% block contenido %}
+
+<!-- Resumen del día -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <div class="stat-card d-flex justify-content-between align-items-center"
+         style="background:linear-gradient(135deg,#1a7a4a,#2e7d32)">
+      <div>
+        <div class="number">${{ total_dia|floatformat:0 }}</div>
+        <div class="label">Total del día</div>
+      </div>
+      <i class="bi bi-cash-stack"></i>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card d-flex justify-content-between align-items-center"
+         style="background:linear-gradient(135deg,#1565c0,#1976d2)">
+      <div>
+        <div class="number">{{ pagos|length }}</div>
+        <div class="label">Consultas cobradas</div>
+      </div>
+      <i class="bi bi-receipt-cutoff"></i>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card h-100">
+      <div class="card-body py-2 px-3">
+        <div class="section-header mb-2">Por forma de pago</div>
+        {% for t in totales %}
+        <div class="d-flex justify-content-between" style="font-size:.85rem">
+          <span class="text-muted">{{ t.forma_pago|capfirst }}</span>
+          <strong>${{ t.total|floatformat:0 }}</strong>
+        </div>
+        {% empty %}
+        <span class="text-muted" style="font-size:.85rem">Sin movimientos</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabla de pagos -->
+<div class="card">
+  <div class="card-header py-3">
+    <i class="bi bi-list-check me-2"></i>Pagos del {{ fecha }}
+  </div>
+
+  {% if pagos %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Recibo</th>
+          <th>Paciente</th>
+          <th>Médico</th>
+          <th>Concepto</th>
+          <th>Forma de pago</th>
+          <th>Hora</th>
+          <th class="text-end">Monto</th>
+          <th class="text-center">Ticket</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pagos %}
+        <tr>
+          <td><code>#{{ p.nro_recibo }}</code></td>
+          <td><strong>{{ p.turno.paciente.nombre_completo }}</strong></td>
+          <td>{{ p.turno.medico.get_full_name|default:"—" }}</td>
+          <td>{{ p.concepto }}</td>
+          <td>
+            <span class="badge rounded-pill
+              {% if p.forma_pago == 'efectivo' %}bg-success
+              {% elif p.forma_pago == 'tarjeta_deb' or p.forma_pago == 'tarjeta_cred' %}bg-primary
+              {% elif p.forma_pago == 'transferencia' %}bg-info text-dark
+              {% elif p.forma_pago == 'obra_social' %}bg-warning text-dark
+              {% else %}bg-secondary{% endif %}">
+              {{ p.get_forma_pago_display }}
+            </span>
+          </td>
+          <td class="text-muted" style="font-size:.85rem">{{ p.fecha|time:"H:i" }}</td>
+          <td class="text-end fw-bold">${{ p.monto|floatformat:2 }}</td>
+          <td class="text-center">
+            <a href="{% url 'facturacion:ticket' p.pk %}" class="btn btn-outline-secondary btn-sm"
+               title="Ver ticket">
+              <i class="bi bi-printer"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="background:#f8f9fb">
+          <td colspan="6" class="text-end fw-bold">Total:</td>
+          <td class="text-end fw-bold text-success">${{ total_dia|floatformat:2 }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-receipt-cutoff" style="font-size:3rem"></i>
+    <p class="mt-2">No hay pagos registrados para esta fecha.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

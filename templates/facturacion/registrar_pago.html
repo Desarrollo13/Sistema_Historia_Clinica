@@ -1,0 +1,102 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Registrar pago{% endblock %}
+{% block page_title %}
+  <i class="bi bi-cash-coin me-2" style="color:#1a7a4a"></i>
+  Registrar pago · <span style="color:#1a7a4a">{{ turno.paciente.nombre_completo }}</span>
+{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+<div class="col-lg-6">
+
+  <!-- Info de la consulta -->
+  <div class="card mb-4" style="border-left: 4px solid #1a7a4a;">
+    <div class="card-body">
+      <div class="row text-center g-0">
+        <div class="col">
+          <div style="font-size:.75rem;color:#888">Turno</div>
+          <strong>#{{ turno.numero }}</strong>
+        </div>
+        <div class="col">
+          <div style="font-size:.75rem;color:#888">Paciente</div>
+          <strong>{{ turno.paciente.nombre_completo }}</strong>
+        </div>
+        <div class="col">
+          <div style="font-size:.75rem;color:#888">Médico</div>
+          <strong>{{ turno.medico.get_full_name|default:"—" }}</strong>
+        </div>
+        <div class="col">
+          <div style="font-size:.75rem;color:#888">Obra social</div>
+          <strong>{{ turno.paciente.obra_social|default:"Particular" }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de pago -->
+  <div class="card">
+    <div class="card-header py-3">
+      <i class="bi bi-cash-coin me-2 text-success"></i>Detalle del pago
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Concepto</label>
+          <input type="text" name="concepto" class="form-control"
+                 value="{{ concepto_default }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Monto <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text fw-bold">$</span>
+            <input type="number" name="monto" class="form-control form-control-lg fw-bold"
+                   placeholder="0.00" step="0.01" min="0" required autofocus
+                   style="font-size:1.5rem;text-align:right">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Forma de pago</label>
+          <div class="row g-2">
+            {% for valor, etiqueta in formas_pago %}
+            <div class="col-6">
+              <input type="radio" class="btn-check" name="forma_pago"
+                     id="fp_{{ valor }}" value="{{ valor }}"
+                     {% if valor == 'efectivo' %}checked{% endif %}>
+              <label class="btn btn-outline-secondary w-100 text-start" for="fp_{{ valor }}">
+                {% if valor == 'efectivo' %}<i class="bi bi-cash me-2"></i>
+                {% elif 'tarjeta' in valor %}<i class="bi bi-credit-card me-2"></i>
+                {% elif valor == 'transferencia' %}<i class="bi bi-bank me-2"></i>
+                {% elif valor == 'obra_social' %}<i class="bi bi-shield-check me-2"></i>
+                {% else %}<i class="bi bi-dash-circle me-2"></i>{% endif %}
+                {{ etiqueta }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Observaciones <span class="text-muted">(opcional)</span></label>
+          <input type="text" name="observaciones" class="form-control"
+                 placeholder="Ej: pago parcial, seña, etc.">
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary flex-grow-1 py-2">
+            <i class="bi bi-check-lg me-1"></i> Confirmar y generar ticket
+          </button>
+          <a href="/facturacion/" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+</div>
+{% endblock %}

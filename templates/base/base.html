@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}Sistema Clínico{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-w: 240px;
+      --verde:     #1a7a4a;
+      --verde-claro: #e8f5ee;
+      --azul-med:  #1565c0;
+      --gris-bg:   #f4f6f9;
+    }
+    body { background: var(--gris-bg); font-family: 'Segoe UI', sans-serif; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: #1b2a3b;
+      position: fixed; top: 0; left: 0; z-index: 100;
+      display: flex; flex-direction: column;
+      transition: width .25s;
+    }
+    #sidebar .brand {
+      padding: 20px 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    #sidebar .brand h6 { color: #fff; margin: 0; font-size: .85rem; opacity: .7; }
+    #sidebar .brand strong { color: #4fc98e; font-size: 1.05rem; letter-spacing: -.3px; }
+
+    #sidebar .nav-link {
+      color: rgba(255,255,255,.65);
+      padding: 10px 20px;
+      border-radius: 0;
+      display: flex; align-items: center; gap: 10px;
+      font-size: .9rem;
+      transition: background .15s, color .15s;
+    }
+    #sidebar .nav-link:hover, #sidebar .nav-link.active {
+      background: rgba(255,255,255,.07);
+      color: #fff;
+    }
+    #sidebar .nav-link.active { border-left: 3px solid #4fc98e; }
+    #sidebar .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+    #sidebar .section-label {
+      color: rgba(255,255,255,.35);
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      padding: 14px 20px 4px;
+    }
+    #sidebar .user-block {
+      margin-top: auto;
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex; align-items: center; gap: 10px;
+    }
+    #sidebar .user-block .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #4fc98e; color: #1b2a3b;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .85rem; flex-shrink: 0;
+    }
+    #sidebar .user-block .info small { color: rgba(255,255,255,.45); font-size: .72rem; display: block; }
+    #sidebar .user-block .info span  { color: #fff; font-size: .82rem; }
+
+    /* ── Contenido principal ── */
+    #main { margin-left: var(--sidebar-w); min-height: 100vh; }
+
+    /* ── Topbar ── */
+    #topbar {
+      background: #fff;
+      border-bottom: 1px solid #e0e4ea;
+      padding: 0 24px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 90;
+    }
+    #topbar .page-title { font-size: 1rem; font-weight: 600; color: #1b2a3b; margin: 0; }
+    #topbar .breadcrumb  { margin: 0; font-size: .8rem; }
+
+    /* ── Cards ── */
+    .card { border: none; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .card-header { background: #fff; border-bottom: 1px solid #f0f0f0; font-weight: 600; border-radius: 12px 12px 0 0 !important; }
+
+    /* ── Stat cards ── */
+    .stat-card { border-radius: 12px; padding: 18px 20px; color: #fff; }
+    .stat-card .number { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .stat-card .label  { font-size: .82rem; opacity: .85; margin-top: 2px; }
+    .stat-card i { font-size: 2rem; opacity: .25; }
+
+    /* ── Tabla ── */
+    .table thead th { background: #f8f9fb; font-size: .8rem; text-transform: uppercase;
+                      letter-spacing: .4px; color: #666; font-weight: 600; border-bottom: 2px solid #eee; }
+    .table tbody tr:hover { background: #f8fbff; }
+    .table td { vertical-align: middle; font-size: .9rem; }
+
+    /* ── Badges de estado ── */
+    .badge-espera    { background: #fff3cd; color: #856404; }
+    .badge-llamado   { background: #cfe2ff; color: #084298; }
+    .badge-atencion  { background: #d1e7dd; color: #0a3622; }
+    .badge-finalizado{ background: #e2e3e5; color: #41464b; }
+
+    /* ── Forms ── */
+    .form-label { font-size: .85rem; font-weight: 600; color: #444; }
+    .form-control, .form-select {
+      border-radius: 8px; border-color: #dde1e7;
+      font-size: .9rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--verde); box-shadow: 0 0 0 3px rgba(26,122,74,.12);
+    }
+    .btn-primary   { background: var(--verde); border-color: var(--verde); }
+    .btn-primary:hover { background: #145f38; border-color: #145f38; }
+    .section-header { font-size: .75rem; font-weight: 700; text-transform: uppercase;
+                      letter-spacing: .5px; color: #888; border-bottom: 1px solid #eee;
+                      padding-bottom: 6px; margin-bottom: 14px; margin-top: 22px; }
+
+    /* ── Signos vitales pills ── */
+    .signo-pill { background: #f0f4ff; border-radius: 8px; padding: 6px 12px;
+                  font-size: .82rem; display: inline-flex; align-items: center; gap: 6px; }
+    .signo-pill strong { color: #1565c0; }
+
+    /* ── Alertas de estado paciente ── */
+    .turno-row td:first-child { border-left: 3px solid transparent; }
+    .turno-row.espera   td:first-child { border-left-color: #ffc107; }
+    .turno-row.llamado  td:first-child { border-left-color: #0d6efd; }
+    .turno-row.atencion td:first-child { border-left-color: #198754; }
+
+    /* ── Receta ── */
+    .receta-item { background: #f8fffe; border: 1px solid #c3e6d8; border-radius: 8px; padding: 12px; }
+
+    @media (max-width: 768px) {
+      #sidebar { width: 0; overflow: hidden; }
+      #main { margin-left: 0; }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div class="brand">
+    <h6>SISTEMA DE</h6>
+    <strong><i class="bi bi-heart-pulse-fill me-1"></i>Historia Clínica</strong>
+  </div>
+
+  {% if user.es_recepcion or user.es_admin %}
+  <div class="section-label">Recepción</div>
+  <a href="/pacientes/" class="nav-link {% if 'pacientes' in request.path %}active{% endif %}">
+    <i class="bi bi-people"></i> Pacientes
+  </a>
+  <a href="/pacientes/nuevo/" class="nav-link">
+    <i class="bi bi-person-plus"></i> Nuevo paciente
+  </a>
+  {% endif %}
+
+  {% if user.es_medico or user.es_admin %}
+  <div class="section-label">Consultorio</div>
+  <a href="/consulta/panel/" class="nav-link {% if 'consulta' in request.path %}active{% endif %}">
+    <i class="bi bi-clipboard2-pulse"></i> Panel médico
+  </a>
+  {% endif %}
+
+  {% if user.es_admin %}
+  <div class="section-label">Administración</div>
+  <a href="/facturacion/" class="nav-link {% if 'facturacion' in request.path %}active{% endif %}">
+    <i class="bi bi-receipt"></i> Facturación
+  </a>
+  <a href="/admin/" class="nav-link">
+    <i class="bi bi-gear"></i> Configuración
+  </a>
+  {% endif %}
+
+  <div class="user-block">
+    <div class="avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+    <div class="info">
+      <span>{{ user.get_full_name|default:user.username }}</span>
+      <small>{{ user.get_rol_display }}</small>
+    </div>
+    <a href="/cuentas/logout/" class="ms-auto text-white-50" title="Cerrar sesión">
+      <i class="bi bi-box-arrow-right"></i>
+    </a>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ═══ CONTENIDO PRINCIPAL ══════════════════════════════════════════════ -->
+<div id="main">
+  {% if user.is_authenticated %}
+  <div id="topbar">
+    <div>
+      <p class="page-title">{% block page_title %}{% endblock %}</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      {% block topbar_actions %}{% endblock %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="p-4">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+
+    {% block contenido %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

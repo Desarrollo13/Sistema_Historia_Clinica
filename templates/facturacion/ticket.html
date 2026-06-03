@@ -1,0 +1,118 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Ticket #{{ pago.nro_recibo }}{% endblock %}
+{% block page_title %}
+  <i class="bi bi-receipt me-2" style="color:#1a7a4a"></i>
+  Ticket de pago · Recibo #{{ pago.nro_recibo }}
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'facturacion:ticket_print' pago.pk %}" target="_blank"
+     class="btn btn-primary btn-sm px-3">
+    <i class="bi bi-printer me-1"></i> Imprimir ticket
+  </a>
+  <a href="{% url 'facturacion:lista' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i> Volver
+  </a>
+{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+<div class="col-lg-5">
+
+  <!-- Preview del ticket -->
+  <div class="card mb-3">
+    <div class="card-header py-3">
+      <i class="bi bi-eye me-2"></i>Vista previa del ticket
+    </div>
+    <div class="card-body d-flex justify-content-center py-4"
+         style="background:#f0f0f0">
+      <!-- Simulación del papel térmico -->
+      <div style="
+        width: 220px;
+        background: #fff;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        padding: 12px 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.15);
+        line-height: 1.5;
+      ">
+        <!-- Cabecera -->
+        <div style="text-align:center; border-bottom: 1px dashed #333; padding-bottom:8px; margin-bottom:8px">
+          <div style="font-size:13px; font-weight:bold">{{ consultorio.nombre }}</div>
+          <div>{{ consultorio.direccion }}</div>
+          <div>{{ consultorio.telefono }}</div>
+          <div>{{ consultorio.ciudad }}</div>
+        </div>
+
+        <!-- Recibo -->
+        <div style="text-align:center; margin-bottom:8px">
+          <div style="font-size:12px; font-weight:bold">RECIBO DE PAGO</div>
+          <div>N° {{ pago.nro_recibo|stringformat:"06d" }}</div>
+        </div>
+
+        <!-- Datos -->
+        <div style="border-bottom:1px dashed #333; padding-bottom:8px; margin-bottom:8px">
+          <div><b>Fecha:</b> {{ pago.fecha|date:"d/m/Y H:i" }}</div>
+          <div><b>Paciente:</b></div>
+          <div style="padding-left:8px">{{ pago.turno.paciente.nombre_completo }}</div>
+          <div><b>DNI:</b> {{ pago.turno.paciente.dni }}</div>
+          {% if pago.turno.medico %}
+          <div><b>Médico:</b></div>
+          <div style="padding-left:8px">Dr/a. {{ pago.turno.medico.get_full_name }}</div>
+          {% endif %}
+          {% if pago.turno.paciente.obra_social %}
+          <div><b>Obra social:</b> {{ pago.turno.paciente.obra_social }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Concepto y monto -->
+        <div style="border-bottom:1px dashed #333; padding-bottom:8px; margin-bottom:8px">
+          <div><b>Concepto:</b></div>
+          <div style="padding-left:8px">{{ pago.concepto }}</div>
+          <div style="margin-top:4px"><b>Forma de pago:</b> {{ pago.get_forma_pago_display }}</div>
+          {% if pago.observaciones %}
+          <div><b>Obs:</b> {{ pago.observaciones }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Total -->
+        <div style="text-align:center; margin-bottom:8px">
+          <div style="font-size:15px; font-weight:bold">
+            TOTAL: ${{ pago.monto|floatformat:2 }}
+          </div>
+        </div>
+
+        <!-- Pie -->
+        <div style="text-align:center; font-size:10px; border-top:1px dashed #333; padding-top:8px">
+          <div>Gracias por su visita</div>
+          <div>Conserve este comprobante</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="card">
+    <div class="card-body">
+      <div class="d-grid gap-2">
+        <a href="{% url 'facturacion:ticket_print' pago.pk %}" target="_blank"
+           class="btn btn-primary py-2">
+          <i class="bi bi-printer me-2"></i>
+          Abrir para imprimir (Ctrl+P)
+        </a>
+        <a href="/pacientes/" class="btn btn-outline-secondary">
+          <i class="bi bi-people me-1"></i> Ir a pacientes
+        </a>
+      </div>
+      <div class="text-center mt-3" style="font-size:.8rem; color:#888">
+        <i class="bi bi-info-circle me-1"></i>
+        El botón abre el ticket en una ventana nueva optimizada para impresión.
+        Usá <kbd>Ctrl+P</kbd> y seleccioná tu impresora.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+{% endblock %}

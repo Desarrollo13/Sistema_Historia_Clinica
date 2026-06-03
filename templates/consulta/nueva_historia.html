@@ -1,0 +1,262 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Nueva historia clínica{% endblock %}
+{% block page_title %}
+  <i class="bi bi-file-medical me-2" style="color:#1565c0"></i>
+  Historia clínica · <span style="color:#1a7a4a">{{ paciente.nombre_completo }}</span>
+{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+
+  <!-- ── Panel izquierdo: datos del paciente ── -->
+  <div class="col-lg-4">
+
+    <!-- Resumen del paciente -->
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-person-circle me-2"></i>Paciente
+      </div>
+      <div class="card-body">
+        <h6 class="mb-1">{{ paciente.nombre_completo }}</h6>
+        <div class="text-muted mb-2" style="font-size:.85rem">
+          DNI {{ paciente.dni }} · {{ paciente.edad }} años · {{ paciente.get_sexo_display }}
+        </div>
+        {% if paciente.alergias %}
+        <div class="alert alert-danger py-2 px-3 mb-2" style="font-size:.82rem">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i>
+          <strong>Alergias:</strong> {{ paciente.alergias }}
+        </div>
+        {% endif %}
+        {% if paciente.antecedentes %}
+        <div style="font-size:.82rem;color:#555">
+          <strong>Antecedentes:</strong> {{ paciente.antecedentes }}
+        </div>
+        {% endif %}
+        {% if paciente.medicacion_habitual %}
+        <div style="font-size:.82rem;color:#555;margin-top:4px">
+          <strong>Medicación habitual:</strong> {{ paciente.medicacion_habitual }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Signos vitales de recepción -->
+    {% if signos %}
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-activity me-2 text-danger"></i>Signos de recepción
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% if signos.presion_sistolica %}
+          <div class="signo-pill"><i class="bi bi-heart-pulse"></i><strong>{{ signos.presion }}</strong> mmHg</div>
+          {% endif %}
+          {% if signos.frecuencia_cardiaca %}
+          <div class="signo-pill"><i class="bi bi-heart"></i><strong>{{ signos.frecuencia_cardiaca }}</strong> lpm</div>
+          {% endif %}
+          {% if signos.temperatura %}
+          <div class="signo-pill"><i class="bi bi-thermometer-half"></i><strong>{{ signos.temperatura }}</strong>°C</div>
+          {% endif %}
+          {% if signos.saturacion_o2 %}
+          <div class="signo-pill"><i class="bi bi-lungs"></i><strong>{{ signos.saturacion_o2 }}</strong>% O₂</div>
+          {% endif %}
+          {% if signos.peso %}
+          <div class="signo-pill"><strong>{{ signos.peso }}</strong> kg</div>
+          {% endif %}
+          {% if signos.talla %}
+          <div class="signo-pill"><strong>{{ signos.talla }}</strong> cm</div>
+          {% endif %}
+          {% if signos.imc %}
+          <div class="signo-pill"><strong>IMC {{ signos.imc }}</strong></div>
+          {% endif %}
+        </div>
+        <div class="mt-3 p-2" style="background:#f8f9fb;border-radius:8px;font-size:.85rem">
+          <strong>Motivo:</strong> {{ signos.motivo_consulta }}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Historial reciente -->
+    {% if historial %}
+    <div class="card">
+      <div class="card-header py-3">
+        <i class="bi bi-clock-history me-2"></i>Consultas anteriores
+      </div>
+      <div class="card-body p-0">
+        {% for h in historial %}
+        <div class="p-3 border-bottom">
+          <div class="d-flex justify-content-between">
+            <small class="text-muted">{{ h.historia.fecha_hora|date:"d/m/Y" }}</small>
+            <small class="text-muted">Dr. {{ h.historia.medico.get_full_name|default:"—" }}</small>
+          </div>
+          <div style="font-size:.85rem;margin-top:4px">
+            <strong>{{ h.historia.diagnostico_principal }}</strong>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /col-lg-4 -->
+
+  <!-- ── Panel derecho: formulario ── -->
+  <div class="col-lg-8">
+    <form method="post" id="form-historia">
+      {% csrf_token %}
+
+      <!-- Anamnesis -->
+      <div class="card mb-3">
+        <div class="card-header py-3">
+          <i class="bi bi-chat-square-text me-2 text-primary"></i>Anamnesis
+        </div>
+        <div class="card-body">
+          <label class="form-label">Historia de la enfermedad actual</label>
+          <textarea name="anamnesis" class="form-control" rows="4" required
+                    placeholder="Paciente refiere… Tiempo de evolución… Síntomas asociados…"></textarea>
+          <div class="mt-3">
+            <label class="form-label">Examen físico</label>
+            <textarea name="examen_fisico" class="form-control" rows="3"
+                      placeholder="Signos al examen… Auscultación… Palpación…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagnóstico -->
+      <div class="card mb-3">
+        <div class="card-header py-3">
+          <i class="bi bi-search-heart me-2 text-warning"></i>Diagnóstico
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-9">
+              <label class="form-label">Diagnóstico principal <span class="text-danger">*</span></label>
+              <input type="text" name="diagnostico_principal" class="form-control" required
+                     placeholder="Ej: Hipertensión arterial esencial">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">CIE-10</label>
+              <input type="text" name="cie10" class="form-control" placeholder="I10">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Diagnósticos secundarios</label>
+              <textarea name="diagnosticos_secundarios" class="form-control" rows="2"
+                        placeholder="Diagnósticos adicionales…"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tratamiento -->
+      <div class="card mb-3">
+        <div class="card-header py-3">
+          <i class="bi bi-bandaid me-2 text-success"></i>Tratamiento
+        </div>
+        <div class="card-body">
+          <label class="form-label">Plan de tratamiento</label>
+          <textarea name="tratamiento" class="form-control" rows="3" required
+                    placeholder="Indicaciones, procedimientos, derivaciones…"></textarea>
+          <div class="mt-3">
+            <label class="form-label">Indicaciones al paciente</label>
+            <textarea name="indicaciones" class="form-control" rows="2"
+                      placeholder="Dieta, reposo, cuidados en casa…"></textarea>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label">Próxima consulta</label>
+              <input type="date" name="proxima_consulta" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Derivación a</label>
+              <input type="text" name="derivacion" class="form-control" placeholder="Cardiólogo, Traumatólogo…">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receta -->
+      <div class="card mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-prescription2 me-2" style="color:#6a1b9a"></i>Receta médica</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarMedicamento()">
+            <i class="bi bi-plus"></i> Agregar medicamento
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="lista-medicamentos">
+            <!-- Los ítems se agregan dinámicamente -->
+          </div>
+          <p class="text-muted text-center mb-0" id="receta-vacia" style="font-size:.85rem">
+            <i class="bi bi-capsule me-1"></i>
+            Haz clic en "Agregar medicamento" para incluir prescripciones.
+          </p>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="/consulta/panel/" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-check-lg me-1"></i> Guardar historia clínica
+        </button>
+      </div>
+
+    </form>
+  </div><!-- /col-lg-8 -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let contadorMed = 0;
+
+function agregarMedicamento() {
+  const i = contadorMed++;
+  const lista = document.getElementById('lista-medicamentos');
+  document.getElementById('receta-vacia').style.display = 'none';
+
+  const div = document.createElement('div');
+  div.className = 'receta-item mb-3';
+  div.id = `med-${i}`;
+  div.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <strong style="font-size:.85rem;color:#6a1b9a">
+        <i class="bi bi-capsule me-1"></i>Medicamento ${contadorMed}
+      </strong>
+      <button type="button" class="btn btn-link btn-sm text-danger p-0"
+              onclick="quitarMedicamento(${i})">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+    <div class="row g-2">
+      <div class="col-md-6">
+        <input type="text" name="medicamento[]" class="form-control form-control-sm"
+               placeholder="Nombre del medicamento" required>
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="dosis[]" class="form-control form-control-sm"
+               placeholder="Dosis (ej: 10mg)">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="forma[]" class="form-control form-control-sm"
+               placeholder="Forma (comp., jarabe…)">
+      </div>
+      <div class="col-12">
+        <input type="text" name="posologia[]" class="form-control form-control-sm"
+               placeholder="Posología: ej: 1 comprimido cada 12 hs por 7 días">
+      </div>
+    </div>`;
+  lista.appendChild(div);
+}
+
+function quitarMedicamento(i) {
+  document.getElementById(`med-${i}`)?.remove();
+  if (document.querySelectorAll('.receta-item').length === 0) {
+    document.getElementById('receta-vacia').style.display = '';
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Panel médico{% endblock %}
+{% block page_title %}
+  <i class="bi bi-clipboard2-pulse me-2" style="color:#1a7a4a"></i>Panel del médico
+  <span class="ms-2 badge bg-secondary" style="font-size:.75rem" id="hora-reloj"></span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <span class="text-muted" style="font-size:.82rem">
+    <i class="bi bi-arrow-repeat me-1" id="icono-refresh"></i>
+    Actualización automática
+  </span>
+{% endblock %}
+
+{% block contenido %}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-4">
+    <div class="stat-card d-flex justify-content-between align-items-center"
+         style="background: linear-gradient(135deg,#1a7a4a,#2e7d32)">
+      <div>
+        <div class="number" id="stat-espera">{{ turnos|length }}</div>
+        <div class="label">En espera ahora</div>
+      </div>
+      <i class="bi bi-people-fill"></i>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card d-flex justify-content-between align-items-center"
+         style="background: linear-gradient(135deg,#1565c0,#1976d2)">
+      <div>
+        <div class="number">{{ atendidos_hoy }}</div>
+        <div class="label">Atendidos hoy</div>
+      </div>
+      <i class="bi bi-check2-circle"></i>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="stat-card d-flex justify-content-between align-items-center"
+         style="background: linear-gradient(135deg,#6a1b9a,#8e24aa)">
+      <div>
+        <div class="number">{{ user.especialidad|default:"—" }}</div>
+        <div class="label">Especialidad</div>
+      </div>
+      <i class="bi bi-person-badge-fill"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Cola de espera -->
+<div class="card">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-list-ol me-2"></i>Cola de espera</span>
+    <span class="text-muted" style="font-size:.8rem">
+      Última actualización: <span id="ultima-actualizacion">ahora</span>
+    </span>
+  </div>
+
+  <div id="tabla-turnos">
+    {% include "consulta/_tabla_turnos.html" %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Reloj ──────────────────────────────────────────────────────────────────
+function actualizarReloj() {
+  const ahora = new Date();
+  document.getElementById('hora-reloj').textContent =
+    ahora.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+actualizarReloj();
+setInterval(actualizarReloj, 1000);
+
+// ── Polling cada 30 segundos ───────────────────────────────────────────────
+async function refrescarTurnos() {
+  const icono = document.getElementById('icono-refresh');
+  icono.style.animation = 'spin .7s linear infinite';
+  try {
+    const resp = await fetch('/consulta/api/turnos/');
+    const data = await resp.json();
+    document.getElementById('stat-espera').textContent = data.turnos.length;
+    renderTurnos(data.turnos);
+    const ahora = new Date();
+    document.getElementById('ultima-actualizacion').textContent =
+      ahora.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+  } catch(e) {
+    console.error('Error al actualizar turnos:', e);
+  } finally {
+    icono.style.animation = '';
+  }
+}
+
+function renderTurnos(turnos) {
+  const tbody = document.getElementById('tbody-turnos');
+  if (!tbody) return;
+
+  if (turnos.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">
+      <i class="bi bi-check2-all" style="font-size:2rem"></i>
+      <p class="mt-2">Sin pacientes en espera</p></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = turnos.map(t => `
+    <tr class="turno-row ${t.estado}">
+      <td><span class="badge bg-secondary rounded-pill">#${t.numero}</span></td>
+      <td><strong>${t.paciente}</strong></td>
+      <td>${t.motivo}</td>
+      <td>
+        <div class="d-flex gap-1 flex-wrap">
+          ${t.presion !== '—'    ? `<span class="signo-pill"><strong>${t.presion}</strong> mmHg</span>` : ''}
+          ${t.temperatura !== '—' ? `<span class="signo-pill"><strong>${t.temperatura}</strong>°C</span>` : ''}
+          ${t.saturacion !== '—'  ? `<span class="signo-pill"><strong>${t.saturacion}</strong>%O₂</span>` : ''}
+        </div>
+      </td>
+      <td><span class="text-muted" style="font-size:.85rem">${t.hora}</span></td>
+      <td><span class="badge badge-${t.estado} rounded-pill">${estadoLabel(t.estado)}</span></td>
+      <td>
+        <div class="btn-group btn-group-sm">
+          <a href="/consulta/llamar/${t.id}/" class="btn btn-outline-primary" title="Llamar paciente">
+            <i class="bi bi-megaphone"></i>
+          </a>
+          <a href="/consulta/iniciar/${t.id}/" class="btn btn-success" title="Iniciar consulta">
+            <i class="bi bi-play-fill"></i> Atender
+          </a>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function estadoLabel(e) {
+  return {espera:'En espera', llamado:'Llamado', atencion:'En atención'}[e] || e;
+}
+
+// Iniciar polling
+setInterval(refrescarTurnos, 30000);
+
+// Animación CSS para el ícono de refresh
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+</script>
+{% endblock %}

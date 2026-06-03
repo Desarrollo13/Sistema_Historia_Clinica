@@ -1,0 +1,252 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Signos vitales — {{ paciente.nombre_completo }}{% endblock %}
+{% block page_title %}
+  <i class="bi bi-heart-pulse me-2" style="color:#dc3545"></i>
+  Signos vitales · <span style="color:#1a7a4a">{{ paciente.nombre_completo }}</span>
+{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+  <div class="col-lg-8">
+
+    <!-- Info rápida del paciente -->
+    <div class="card mb-4" style="border-left: 4px solid #1a7a4a;">
+      <div class="card-body py-3">
+        <div class="row text-center g-0">
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">DNI</div>
+            <strong>{{ paciente.dni }}</strong>
+          </div>
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">Edad</div>
+            <strong>{{ paciente.edad }} años</strong>
+          </div>
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">Sexo</div>
+            <strong>{{ paciente.get_sexo_display }}</strong>
+          </div>
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">Sangre</div>
+            <strong>{{ paciente.grupo_sanguineo|default:"—" }}</strong>
+          </div>
+          {% if paciente.alergias %}
+          <div class="col">
+            <div style="font-size:.75rem;color:#dc3545">⚠ Alergias</div>
+            <strong style="color:#dc3545;font-size:.85rem">{{ paciente.alergias }}</strong>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Signos vitales -->
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-activity me-2 text-danger"></i>Signos vitales
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+
+            <!-- Presión -->
+            <div class="col-md-6">
+              <label class="form-label">Presión arterial (mmHg)</label>
+              <div class="input-group">
+                <input type="number" name="presion_sistolica" class="form-control text-center"
+                       placeholder="SIS" min="50" max="300">
+                <span class="input-group-text">/</span>
+                <input type="number" name="presion_diastolica" class="form-control text-center"
+                       placeholder="DIA" min="30" max="200">
+              </div>
+            </div>
+
+            <!-- FC -->
+            <div class="col-md-3">
+              <label class="form-label">Frec. cardíaca (lpm)</label>
+              <div class="input-group">
+                <input type="number" name="frecuencia_cardiaca" class="form-control" placeholder="72" min="20" max="300">
+                <span class="input-group-text"><i class="bi bi-heart-fill text-danger"></i></span>
+              </div>
+            </div>
+
+            <!-- FR -->
+            <div class="col-md-3">
+              <label class="form-label">Frec. respiratoria (rpm)</label>
+              <input type="number" name="frecuencia_respiratoria" class="form-control" placeholder="16" min="5" max="60">
+            </div>
+
+            <!-- Temperatura -->
+            <div class="col-md-3">
+              <label class="form-label">Temperatura (°C)</label>
+              <div class="input-group">
+                <input type="number" name="temperatura" class="form-control" placeholder="36.5"
+                       step="0.1" min="34" max="43">
+                <span class="input-group-text">°C</span>
+              </div>
+            </div>
+
+            <!-- SatO2 -->
+            <div class="col-md-3">
+              <label class="form-label">Saturación O₂ (%)</label>
+              <div class="input-group">
+                <input type="number" name="saturacion_o2" class="form-control" placeholder="98" min="50" max="100">
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+
+            <!-- Peso / Talla -->
+            <div class="col-md-3">
+              <label class="form-label">Peso (kg)</label>
+              <div class="input-group">
+                <input type="number" name="peso" class="form-control" id="peso" placeholder="70" step="0.1" min="1">
+                <span class="input-group-text">kg</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Talla (cm)</label>
+              <div class="input-group">
+                <input type="number" name="talla" class="form-control" id="talla" placeholder="170" min="50" max="250">
+                <span class="input-group-text">cm</span>
+              </div>
+            </div>
+
+            <!-- IMC calculado -->
+            <div class="col-12">
+              <div id="imc-display" class="d-none">
+                <span class="signo-pill">
+                  <i class="bi bi-calculator"></i>
+                  IMC calculado: <strong id="imc-valor">—</strong>
+                  <span id="imc-categoria" style="font-size:.78rem"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivo de consulta -->
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-chat-left-text me-2 text-primary"></i>Motivo de consulta
+        </div>
+        <div class="card-body">
+          <textarea name="motivo_consulta" class="form-control" rows="3"
+                    placeholder="Describa el motivo principal de la consulta…" required></textarea>
+          <div class="mt-3">
+            <label class="form-label">Observaciones de recepción</label>
+            <textarea name="observaciones" class="form-control" rows="2"
+                      placeholder="Notas adicionales (opcional)…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asignar médico -->
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-person-badge me-2 text-success"></i>Asignar al médico
+        </div>
+        <div class="card-body">
+          {% if medicos %}
+            {% for medico in medicos %}
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="medico_id"
+                     id="med{{ medico.pk }}" value="{{ medico.pk }}"
+                     {% if forloop.first %}checked{% endif %}>
+              <label class="form-check-label" for="med{{ medico.pk }}">
+                <strong>Dr/a. {{ medico.get_full_name }}</strong>
+                {% if medico.especialidad %}
+                  <span class="text-muted ms-1">· {{ medico.especialidad }}</span>
+                {% endif %}
+              </label>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="alert alert-warning py-2 mb-0" style="font-size:.85rem">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              No hay médicos activos. Configure al menos un médico desde el panel de administración.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4 py-2" {% if not medicos %}disabled{% endif %}>
+          <i class="bi bi-send me-1"></i> Enviar al panel del médico
+        </button>
+        <a href="/pacientes/" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+
+    </form>
+  </div><!-- /col -->
+
+  <!-- Historial de signos -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header py-3">
+        <i class="bi bi-clock-history me-2"></i>Últimas consultas
+      </div>
+      <div class="card-body p-0">
+        {% with turnos=paciente.turnos.all|slice:":5" %}
+        {% if turnos %}
+          {% for t in turnos %}
+          <div class="p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+              <small class="text-muted">{{ t.fecha_hora|date:"d/m/Y" }}</small>
+              <span class="badge badge-{{ t.estado }} rounded-pill">{{ t.get_estado_display }}</span>
+            </div>
+            {% if t.signos %}
+            <div class="mt-1" style="font-size:.82rem">
+              <span class="me-2">🫀 {{ t.signos.presion }}</span>
+              <span class="me-2">🌡 {{ t.signos.temperatura|default:"—" }}°C</span>
+              <span>💉 {{ t.signos.saturacion_o2|default:"—" }}%</span>
+            </div>
+            <div class="text-muted mt-1" style="font-size:.8rem">{{ t.signos.motivo_consulta|truncatechars:60 }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-clipboard2-x" style="font-size:1.8rem"></i>
+            <p class="mt-2 mb-0" style="font-size:.85rem">Sin consultas anteriores</p>
+          </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Cálculo automático de IMC
+  const pesoInput  = document.getElementById('peso');
+  const tallaInput = document.getElementById('talla');
+  const imcDisplay = document.getElementById('imc-display');
+  const imcValor   = document.getElementById('imc-valor');
+  const imcCat     = document.getElementById('imc-categoria');
+
+  function calcIMC() {
+    const p = parseFloat(pesoInput.value);
+    const t = parseFloat(tallaInput.value) / 100;
+    if (p > 0 && t > 0) {
+      const imc = (p / (t * t)).toFixed(1);
+      let cat = '', color = '';
+      if      (imc < 18.5) { cat = '· Bajo peso';      color = '#0d6efd'; }
+      else if (imc < 25)   { cat = '· Normal';          color = '#198754'; }
+      else if (imc < 30)   { cat = '· Sobrepeso';       color = '#fd7e14'; }
+      else                 { cat = '· Obesidad';         color = '#dc3545'; }
+      imcValor.textContent = imc;
+      imcCat.textContent = cat;
+      imcCat.style.color = color;
+      imcDisplay.classList.remove('d-none');
+    }
+  }
+  pesoInput.addEventListener('input', calcIMC);
+  tallaInput.addEventListener('input', calcIMC);
+</script>
+{% endblock %}
