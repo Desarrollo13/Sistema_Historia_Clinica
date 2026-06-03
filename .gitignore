@@ -1,8 +1,7 @@
 # Entorno virtual
-.blog/
+
 venv/
-env/
-resto/
+
 
 # Variables de entorno
 .env
