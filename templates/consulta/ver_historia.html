@@ -1,0 +1,160 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Historia clínica{% endblock %}
+{% block page_title %}
+  <i class="bi bi-file-earmark-medical me-2" style="color:#1565c0"></i>
+  Historia clínica · <span style="color:#1a7a4a">{{ historia.turno.paciente.nombre_completo }}</span>
+{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'consulta:receta_pdf' historia.pk %}" target="_blank" class="btn btn-outline-primary btn-sm px-3">
+    <i class="bi bi-filetype-pdf me-1"></i> Receta PDF
+  </a>
+  <a href="{% url 'facturacion:registrar' historia.turno.pk %}" class="btn btn-primary btn-sm px-3">
+    <i class="bi bi-cash-coin me-1"></i> Registrar pago
+  </a>
+  <a href="/pacientes/{{ historia.turno.paciente.pk }}/" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i> Volver a ficha
+  </a>
+{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-person-circle me-2"></i>Paciente y consulta
+      </div>
+      <div class="card-body">
+        <h6 class="mb-1">{{ historia.turno.paciente.nombre_completo }}</h6>
+        <div class="text-muted mb-3" style="font-size:.85rem">
+          DNI {{ historia.turno.paciente.dni }} · {{ historia.turno.paciente.edad }} años
+        </div>
+        <div style="font-size:.9rem">
+          <div class="mb-2"><strong>Fecha:</strong> {{ historia.fecha_hora|date:"d/m/Y H:i" }}</div>
+          <div class="mb-2"><strong>Médico:</strong> Dr/a. {{ historia.medico.get_full_name|default:historia.medico.username }}</div>
+          <div class="mb-2"><strong>Turno:</strong> #{{ historia.turno.numero }}</div>
+          <div><strong>CIE-10:</strong> {{ historia.cie10|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+
+    {% if historia.turno.signos %}
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-activity me-2 text-danger"></i>Signos de recepción
+      </div>
+      <div class="card-body">
+        <div class="d-flex gap-2 flex-wrap">
+          {% if historia.turno.signos.presion_sistolica %}<span class="signo-pill"><strong>{{ historia.turno.signos.presion }}</strong> mmHg</span>{% endif %}
+          {% if historia.turno.signos.frecuencia_cardiaca %}<span class="signo-pill"><strong>{{ historia.turno.signos.frecuencia_cardiaca }}</strong> lpm</span>{% endif %}
+          {% if historia.turno.signos.temperatura %}<span class="signo-pill"><strong>{{ historia.turno.signos.temperatura }}</strong>°C</span>{% endif %}
+          {% if historia.turno.signos.saturacion_o2 %}<span class="signo-pill"><strong>{{ historia.turno.signos.saturacion_o2 }}</strong>% O₂</span>{% endif %}
+          {% if historia.turno.signos.imc %}<span class="signo-pill"><strong>IMC {{ historia.turno.signos.imc }}</strong></span>{% endif %}
+        </div>
+        <div class="mt-3" style="font-size:.9rem">
+          <strong>Motivo:</strong> {{ historia.turno.signos.motivo_consulta }}
+        </div>
+        {% if historia.turno.signos.observaciones %}
+        <div class="mt-2 text-muted" style="font-size:.85rem">
+          <strong>Observaciones:</strong> {{ historia.turno.signos.observaciones }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if historia.turno.paciente.alergias %}
+    <div class="alert alert-danger py-3 px-3 mb-0">
+      <strong>Alergias:</strong> {{ historia.turno.paciente.alergias }}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-chat-square-text me-2 text-primary"></i>Anamnesis y examen físico
+      </div>
+      <div class="card-body" style="font-size:.92rem">
+        <div class="mb-3">
+          <div class="section-header mt-0">Anamnesis</div>
+          {{ historia.anamnesis|linebreaksbr }}
+        </div>
+        <div>
+          <div class="section-header">Examen físico</div>
+          {{ historia.examen_fisico|default:"Sin datos registrados."|linebreaksbr }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header py-3">
+        <i class="bi bi-search-heart me-2 text-warning"></i>Diagnóstico y plan
+      </div>
+      <div class="card-body" style="font-size:.92rem">
+        <div class="mb-3">
+          <div class="section-header mt-0">Diagnóstico principal</div>
+          <strong>{{ historia.diagnostico_principal }}</strong>
+        </div>
+        <div class="mb-3">
+          <div class="section-header">Diagnósticos secundarios</div>
+          {{ historia.diagnosticos_secundarios|default:"Sin datos registrados."|linebreaksbr }}
+        </div>
+        <div class="mb-3">
+          <div class="section-header">Tratamiento</div>
+          {{ historia.tratamiento|linebreaksbr }}
+        </div>
+        <div class="mb-3">
+          <div class="section-header">Indicaciones</div>
+          {{ historia.indicaciones|default:"Sin datos registrados."|linebreaksbr }}
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="section-header">Próxima consulta</div>
+            {{ historia.proxima_consulta|date:"d/m/Y"|default:"—" }}
+          </div>
+          <div class="col-md-6">
+            <div class="section-header">Derivación</div>
+            {{ historia.derivacion|default:"—" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header py-3">
+        <i class="bi bi-prescription2 me-2" style="color:#6a1b9a"></i>Receta médica
+      </div>
+      {% with items=historia.receta_items.all %}
+      {% if items %}
+      <div class="card-body">
+        <div class="d-flex justify-content-end mb-3">
+          <a href="{% url 'consulta:receta_pdf' historia.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-download me-1"></i> Abrir receta en PDF
+          </a>
+        </div>
+        {% for item in items %}
+        <div class="receta-item {% if not forloop.last %}mb-3{% endif %}">
+          <div class="fw-semibold">{{ item.medicamento }}</div>
+          <div class="text-muted" style="font-size:.85rem">
+            {{ item.dosis|default:"—" }}{% if item.forma %} · {{ item.forma }}{% endif %}
+          </div>
+          <div class="mt-2"><strong>Posología:</strong> {{ item.posologia|default:"—" }}</div>
+          {% if item.instrucciones %}
+          <div class="mt-1 text-muted">{{ item.instrucciones|linebreaksbr }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4 text-muted">
+        <i class="bi bi-capsule" style="font-size:1.8rem"></i>
+        <p class="mt-2 mb-0">Esta consulta no tiene medicamentos cargados.</p>
+      </div>
+      {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.contrib.auth import views as auth_views
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect
@@ -40,3 +41,9 @@ class LoginView(auth_views.LoginView):
         if user.es_medico:
             return '/consulta/panel/'
         return '/pacientes/'
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('cuentas:login')

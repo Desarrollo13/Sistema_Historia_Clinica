@@ -3,16 +3,30 @@ Configuración principal del Sistema de Historias Clínicas.
 """
 from pathlib import Path
 import os
+import socket
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-clinica-local-change-me-in-production'
 
-# En producción cambiar a False y configurar ALLOWED_HOSTS correctamente
-DEBUG = True
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
-# Permite acceso desde cualquier PC en la red local
-ALLOWED_HOSTS = ['*']
+
+def env_list(name, default=''):
+    value = os.getenv(name, default)
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
+SECRET_KEY = os.getenv('CLINICA_SECRET_KEY', 'django-insecure-clinica-local-change-me-in-production')
+
+# Para uso LAN real, dejar DEBUG apagado y cargar hosts/IPs permitidos desde entorno.
+DEBUG = env_bool('CLINICA_DEBUG', False)
+
+DEFAULT_ALLOWED_HOSTS = ['127.0.0.1', 'localhost', socket.gethostname()]
+ALLOWED_HOSTS = env_list('CLINICA_ALLOWED_HOSTS', ','.join(DEFAULT_ALLOWED_HOSTS))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -97,6 +111,16 @@ ROLES = {
     'ADMIN': 'admin',
     'MEDICO': 'medico',
     'RECEPCION': 'recepcion',
+}
+
+# Datos del consultorio para tickets y recetas.
+CONSULTORIO = {
+    'nombre': os.getenv('CLINICA_CONSULTORIO_NOMBRE', 'Consultorio Medico'),
+    'direccion': os.getenv('CLINICA_CONSULTORIO_DIRECCION', 'Direccion del consultorio'),
+    'telefono': os.getenv('CLINICA_CONSULTORIO_TELEFONO', 'Tel: 000-0000'),
+    'email': os.getenv('CLINICA_CONSULTORIO_EMAIL', 'consultas@clinica.local'),
+    'ciudad': os.getenv('CLINICA_CONSULTORIO_CIUDAD', 'Ciudad no configurada'),
+    'logo': os.getenv('CLINICA_CONSULTORIO_LOGO') or None,
 }
 
 # Configuración impresora térmica (ajustar según modelo)

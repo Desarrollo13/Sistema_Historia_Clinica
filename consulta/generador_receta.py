@@ -4,6 +4,7 @@ Genera la receta médica en PDF usando ReportLab.
 Colocar en: consulta/generador_receta.py
 """
 from io import BytesIO
+from django.conf import settings
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.lib import colors
@@ -23,17 +24,6 @@ GRIS_TEXTO   = colors.HexColor('#333333')
 GRIS_SUAVE   = colors.HexColor('#666666')
 GRIS_LINEA   = colors.HexColor('#dddddd')
 AZUL_DATO    = colors.HexColor('#1565c0')
-
-
-# ── Datos del consultorio (editar según el consultorio real) ───────────────────
-CONSULTORIO = {
-    'nombre':     'Consultorio Médico',
-    'direccion':  'Av. San Martín 1234, Mendoza',
-    'telefono':   'Tel: 0261-4123456',
-    'email':      'consultas@clinica.com',
-    'ciudad':     'Mendoza, Argentina',
-    'logo':       None,   # ruta a imagen PNG/JPG, o None si no hay logo
-}
 
 
 def generar_receta_pdf(historia):
@@ -58,6 +48,7 @@ def generar_receta_pdf(historia):
 
     story = []
     styles = getSampleStyleSheet()
+    consultorio = settings.CONSULTORIO
 
     # ── Estilos personalizados ─────────────────────────────────────────────────
     estilo_titulo = ParagraphStyle(
@@ -129,17 +120,17 @@ def generar_receta_pdf(historia):
     )
 
     paciente = historia.turno.paciente
-    medico   = historia.medico
+    medico = historia.medico or historia.turno.medico
 
     # ══════════════════════════════════════════════════════════════════════════
     # CABECERA
     # ══════════════════════════════════════════════════════════════════════════
     cabecera_data = [[
-        Paragraph(CONSULTORIO['nombre'], estilo_titulo),
+        Paragraph(consultorio['nombre'], estilo_titulo),
         Paragraph(
-            f"{CONSULTORIO['direccion']}<br/>"
-            f"{CONSULTORIO['telefono']}<br/>"
-            f"{CONSULTORIO['email']}",
+            f"{consultorio['direccion']}<br/>"
+            f"{consultorio['telefono']}<br/>"
+            f"{consultorio['email']}",
             ParagraphStyle('info_der', parent=estilo_subtitulo, alignment=TA_RIGHT)
         )
     ]]
@@ -164,11 +155,12 @@ def generar_receta_pdf(historia):
     # DATOS DEL MÉDICO Y PACIENTE (dos columnas)
     # ══════════════════════════════════════════════════════════════════════════
     especialidad = getattr(medico, 'especialidad', '') or ''
-    matricula    = getattr(medico, 'matricula', '') or ''
+    matricula = getattr(medico, 'matricula', '') or ''
+    medico_nombre = medico.get_full_name() if medico else 'Profesional no informado'
 
     bloque_medico = [
         Paragraph('<b>MÉDICO PRESCRIPTOR</b>', estilo_seccion),
-        Paragraph(f"Dr/a. {medico.get_full_name()}", estilo_med_nombre),
+        Paragraph(f"Dr/a. {medico_nombre}", estilo_med_nombre),
         Paragraph(especialidad, estilo_med_detalle) if especialidad else Spacer(1, 1),
         Paragraph(f"Matrícula: {matricula}", estilo_med_detalle) if matricula else Spacer(1, 1),
         Paragraph(historia.fecha_hora.strftime('%d/%m/%Y'), estilo_med_detalle),
@@ -289,7 +281,7 @@ def generar_receta_pdf(historia):
         Table(
             [[Paragraph(
                 f"_________________________<br/>"
-                f"<b>Dr/a. {medico.get_full_name()}</b><br/>"
+                f"<b>Dr/a. {medico_nombre}</b><br/>"
                 f"{especialidad}<br/>"
                 f"{'Mat. ' + matricula if matricula else ''}",
                 estilo_firma
@@ -311,7 +303,7 @@ def generar_receta_pdf(historia):
     story.append(HRFlowable(width='100%', thickness=1, color=VERDE))
     story.append(Spacer(1, 0.2*cm))
     story.append(Paragraph(
-        f"{CONSULTORIO['nombre']}  ·  {CONSULTORIO['direccion']}  ·  {CONSULTORIO['telefono']}",
+        f"{consultorio['nombre']}  ·  {consultorio['direccion']}  ·  {consultorio['telefono']}",
         ParagraphStyle('pie', parent=styles['Normal'], fontSize=7,
                        textColor=GRIS_SUAVE, alignment=TA_CENTER)
     ))

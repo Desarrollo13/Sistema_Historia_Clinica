@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST
 
 from pacientes.models import Paciente, SignosVitales
 from .models import Turno, HistoriaClinica, RecetaMedicamento
+from .generador_receta import generar_receta_pdf
 from cuentas.views import solo_medico, rol_requerido
 
 
@@ -112,6 +113,15 @@ def nueva_historia(request, turno_id):
 def ver_historia(request, historia_id):
     historia = get_object_or_404(HistoriaClinica, pk=historia_id)
     return render(request, 'consulta/ver_historia.html', {'historia': historia})
+
+
+@login_required
+def receta_pdf(request, historia_id):
+    historia = get_object_or_404(HistoriaClinica, pk=historia_id)
+    pdf_bytes = generar_receta_pdf(historia)
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="receta_{historia.pk}.pdf"'
+    return response
 
 
 # ── API para polling (actualización automática del panel médico) ───────────────

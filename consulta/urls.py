@@ -10,5 +10,6 @@ urlpatterns = [
     path('iniciar/<int:turno_id>/',        views.iniciar_consulta,  name='iniciar'),
     path('historia/<int:turno_id>/nueva/', views.nueva_historia,    name='nueva_historia'),
     path('historia/<int:historia_id>/',    views.ver_historia,      name='ver_historia'),
+    path('historia/<int:historia_id>/receta.pdf', views.receta_pdf, name='receta_pdf'),
     path('api/turnos/',                    views.api_turnos_espera, name='api_turnos'),
 ]

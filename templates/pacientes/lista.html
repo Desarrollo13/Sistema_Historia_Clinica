@@ -1,12 +1,24 @@
 {% extends "base/base.html" %}
 
-{% block titulo %}Pacientes{% endblock %}
-{% block page_title %}<i class="bi bi-people me-2" style="color:#1a7a4a"></i>Pacientes{% endblock %}
+{% block titulo %}{% if mostrar_inactivos %}Pacientes inactivos{% else %}Pacientes{% endif %}{% endblock %}
+{% block page_title %}
+  <i class="bi {% if mostrar_inactivos %}bi-person-x{% else %}bi-people{% endif %} me-2" style="color:#1a7a4a"></i>
+  {% if mostrar_inactivos %}Pacientes inactivos{% else %}Pacientes{% endif %}
+{% endblock %}
 
 {% block topbar_actions %}
+  {% if mostrar_inactivos %}
+  <a href="{% url 'pacientes:lista' %}" class="btn btn-outline-secondary btn-sm px-3">
+    <i class="bi bi-arrow-left me-1"></i> Ver activos
+  </a>
+  {% else %}
+  <a href="{% url 'pacientes:inactivos' %}" class="btn btn-outline-secondary btn-sm px-3">
+    <i class="bi bi-person-x me-1"></i> Inactivos
+  </a>
   <a href="/pacientes/nuevo/" class="btn btn-primary btn-sm px-3">
     <i class="bi bi-person-plus me-1"></i> Nuevo paciente
   </a>
+  {% endif %}
 {% endblock %}
 
 {% block contenido %}
@@ -20,7 +32,7 @@
       </div>
       <button class="btn btn-primary px-3" type="submit">Buscar</button>
       {% if query %}
-        <a href="/pacientes/" class="btn btn-outline-secondary px-3">
+        <a href="{% if mostrar_inactivos %}{% url 'pacientes:inactivos' %}{% else %}{% url 'pacientes:lista' %}{% endif %}" class="btn btn-outline-secondary px-3">
           <i class="bi bi-x"></i> Limpiar
         </a>
       {% endif %}
@@ -30,18 +42,24 @@
   {% if query and not pacientes %}
   <div class="text-center py-5 text-muted">
     <i class="bi bi-person-x" style="font-size:2.5rem"></i>
-    <p class="mt-2">No se encontraron pacientes para "<strong>{{ query }}</strong>"</p>
+    <p class="mt-2">No se encontraron {% if mostrar_inactivos %}pacientes inactivos{% else %}pacientes{% endif %} para "<strong>{{ query }}</strong>"</p>
+    {% if not mostrar_inactivos %}
     <a href="/pacientes/nuevo/" class="btn btn-primary">
       <i class="bi bi-person-plus me-1"></i> Registrar nuevo paciente
     </a>
+    {% endif %}
   </div>
   {% elif not pacientes and not query %}
   <div class="text-center py-5 text-muted">
-    <i class="bi bi-people" style="font-size:2.5rem"></i>
-    <p class="mt-2">No hay pacientes registrados aún.</p>
+    <i class="bi {% if mostrar_inactivos %}bi-person-x{% else %}bi-people{% endif %}" style="font-size:2.5rem"></i>
+    <p class="mt-2">
+      {% if mostrar_inactivos %}No hay pacientes inactivos.{% else %}No hay pacientes registrados aún.{% endif %}
+    </p>
+    {% if not mostrar_inactivos %}
     <a href="/pacientes/nuevo/" class="btn btn-primary">
       <i class="bi bi-person-plus me-1"></i> Registrar primer paciente
     </a>
+    {% endif %}
   </div>
   {% else %}
   <div class="table-responsive">
@@ -71,9 +89,21 @@
               <a href="/pacientes/{{ p.pk }}/" class="btn btn-outline-secondary" title="Ver ficha">
                 <i class="bi bi-eye"></i>
               </a>
+              {% if mostrar_inactivos %}
+              <form method="post" action="{% url 'pacientes:reactivar' p.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-success" title="Reactivar paciente">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+              </form>
+              {% else %}
+              <a href="{% url 'pacientes:editar' p.pk %}" class="btn btn-outline-warning" title="Editar paciente">
+                <i class="bi bi-pencil"></i>
+              </a>
               <a href="/pacientes/{{ p.pk }}/signos/" class="btn btn-outline-primary" title="Tomar signos vitales">
                 <i class="bi bi-heart-pulse"></i>
               </a>
+              {% endif %}
             </div>
           </td>
         </tr>

@@ -9,6 +9,34 @@ from consulta.models import Turno
 from cuentas.models import Usuario
 
 
+PACIENTE_FIELDS = (
+    'dni', 'apellido', 'nombre', 'fecha_nacimiento', 'sexo',
+    'telefono', 'email', 'domicilio', 'ciudad',
+    'grupo_sanguineo', 'obra_social', 'nro_afiliado',
+    'alergias', 'antecedentes', 'medicacion_habitual',
+)
+
+
+def _paciente_data_from_post(request):
+    return {
+        'dni': request.POST['dni'],
+        'apellido': request.POST['apellido'],
+        'nombre': request.POST['nombre'],
+        'fecha_nacimiento': request.POST['fecha_nacimiento'],
+        'sexo': request.POST['sexo'],
+        'telefono': request.POST.get('telefono', ''),
+        'email': request.POST.get('email', ''),
+        'domicilio': request.POST.get('domicilio', ''),
+        'ciudad': request.POST.get('ciudad', ''),
+        'grupo_sanguineo': request.POST.get('grupo_sanguineo', ''),
+        'obra_social': request.POST.get('obra_social', ''),
+        'nro_afiliado': request.POST.get('nro_afiliado', ''),
+        'alergias': request.POST.get('alergias', ''),
+        'antecedentes': request.POST.get('antecedentes', ''),
+        'medicacion_habitual': request.POST.get('medicacion_habitual', ''),
+    }
+
+
 @login_required
 def lista_pacientes(request):
     query = request.GET.get('q', '').strip()
@@ -24,6 +52,26 @@ def lista_pacientes(request):
     return render(request, 'pacientes/lista.html', {
         'pacientes': pacientes[:50],
         'query': query,
+        'mostrar_inactivos': False,
+    })
+
+
+@login_required
+def lista_pacientes_inactivos(request):
+    query = request.GET.get('q', '').strip()
+    pacientes = Paciente.objects.filter(activo=False)
+
+    if query:
+        pacientes = pacientes.filter(
+            Q(dni__icontains=query) |
+            Q(apellido__icontains=query) |
+            Q(nombre__icontains=query)
+        )
+
+    return render(request, 'pacientes/lista.html', {
+        'pacientes': pacientes[:50],
+        'query': query,
+        'mostrar_inactivos': True,
     })
 
 
@@ -43,29 +91,56 @@ def buscar_paciente_ajax(request):
 def nuevo_paciente(request):
     if request.method == 'POST':
         try:
-            p = Paciente.objects.create(
-                dni=request.POST['dni'],
-                apellido=request.POST['apellido'],
-                nombre=request.POST['nombre'],
-                fecha_nacimiento=request.POST['fecha_nacimiento'],
-                sexo=request.POST['sexo'],
-                telefono=request.POST.get('telefono', ''),
-                email=request.POST.get('email', ''),
-                domicilio=request.POST.get('domicilio', ''),
-                ciudad=request.POST.get('ciudad', ''),
-                grupo_sanguineo=request.POST.get('grupo_sanguineo', ''),
-                obra_social=request.POST.get('obra_social', ''),
-                nro_afiliado=request.POST.get('nro_afiliado', ''),
-                alergias=request.POST.get('alergias', ''),
-                antecedentes=request.POST.get('antecedentes', ''),
-                medicacion_habitual=request.POST.get('medicacion_habitual', ''),
-            )
+            p = Paciente.objects.create(**_paciente_data_from_post(request))
             messages.success(request, f'Paciente {p.nombre_completo} registrado correctamente.')
             return redirect('pacientes:signos_vitales', paciente_id=p.pk)
         except Exception as e:
             messages.error(request, f'Error al registrar: {e}')
 
     return render(request, 'pacientes/nuevo_paciente.html')
+
+
+@login_required
+def editar_paciente(request, pk):
+    paciente = get_object_or_404(Paciente, pk=pk, activo=True)
+
+    if request.method == 'POST':
+        try:
+            for field, value in _paciente_data_from_post(request).items():
+                setattr(paciente, field, value)
+            paciente.save(update_fields=PACIENTE_FIELDS + ('actualizado',))
+            messages.success(request, f'Paciente {paciente.nombre_completo} actualizado correctamente.')
+            return redirect('pacientes:detalle', pk=paciente.pk)
+        except Exception as e:
+            messages.error(request, f'Error al actualizar: {e}')
+
+    return render(request, 'pacientes/editar_paciente.html', {'paciente': paciente})
+
+
+@login_required
+def desactivar_paciente(request, pk):
+    paciente = get_object_or_404(Paciente, pk=pk, activo=True)
+
+    if request.method != 'POST':
+        return redirect('pacientes:detalle', pk=paciente.pk)
+
+    paciente.activo = False
+    paciente.save(update_fields=['activo', 'actualizado'])
+    messages.success(request, f'Paciente {paciente.nombre_completo} dado de baja correctamente.')
+    return redirect('pacientes:lista')
+
+
+@login_required
+def reactivar_paciente(request, pk):
+    paciente = get_object_or_404(Paciente, pk=pk, activo=False)
+
+    if request.method != 'POST':
+        return redirect('pacientes:inactivos')
+
+    paciente.activo = True
+    paciente.save(update_fields=['activo', 'actualizado'])
+    messages.success(request, f'Paciente {paciente.nombre_completo} reactivado correctamente.')
+    return redirect('pacientes:inactivos')
 
 
 @login_required

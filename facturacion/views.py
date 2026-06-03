@@ -1,19 +1,25 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum, Count
 from .models import Pago
 from consulta.models import Turno
+from cuentas.views import rol_requerido
 
 
-@login_required
+@rol_requerido('recepcion')
 def lista_pagos(request):
     """Lista de pagos del día con resumen."""
     hoy = timezone.now().date()
 
     # Filtros
     fecha = request.GET.get('fecha', str(hoy))
+    turnos_pendientes = Turno.objects.filter(
+        fecha_hora__date=fecha,
+        estado='finalizado',
+        pago__isnull=True,
+    ).select_related('paciente', 'medico').order_by('-hora_fin', '-fecha_hora')
     pagos = Pago.objects.filter(fecha__date=fecha).select_related(
         'turno__paciente', 'turno__medico'
     )
@@ -27,6 +33,7 @@ def lista_pagos(request):
     total_dia = pagos.aggregate(t=Sum('monto'))['t'] or 0
 
     return render(request, 'facturacion/lista.html', {
+        'turnos_pendientes': turnos_pendientes,
         'pagos': pagos,
         'totales': totales,
         'total_dia': total_dia,
@@ -35,7 +42,7 @@ def lista_pagos(request):
     })
 
 
-@login_required
+@rol_requerido('recepcion')
 def registrar_pago(request, turno_id):
     """Registrar pago de una consulta finalizada."""
     turno = get_object_or_404(Turno, pk=turno_id)
@@ -74,7 +81,7 @@ def registrar_pago(request, turno_id):
     })
 
 
-@login_required
+@rol_requerido('recepcion')
 def ticket(request, pago_id):
     """Vista del ticket imprimible (HTML → Ctrl+P)."""
     pago = get_object_or_404(Pago, pk=pago_id)
@@ -84,13 +91,7 @@ def ticket(request, pago_id):
         pago.impreso = True
         pago.save(update_fields=['impreso'])
 
-    # Configuración del consultorio (podés editar estos datos)
-    consultorio = {
-        'nombre':    'Consultorio Médico',
-        'direccion': 'Dirección del consultorio',
-        'telefono':  'Tel: 000-0000',
-        'ciudad':    'Mendoza, Argentina',
-    }
+    consultorio = settings.CONSULTORIO
 
     return render(request, 'facturacion/ticket.html', {
         'pago': pago,
@@ -98,16 +99,11 @@ def ticket(request, pago_id):
     })
 
 
-@login_required
+@rol_requerido('recepcion')
 def ticket_imprimir(request, pago_id):
     """Versión solo para impresión (sin sidebar, sin topbar)."""
     pago = get_object_or_404(Pago, pk=pago_id)
-    consultorio = {
-        'nombre':    'Consultorio Médico',
-        'direccion': 'Dirección del consultorio',
-        'telefono':  'Tel: 000-0000',
-        'ciudad':    'Mendoza, Argentina',
-    }
+    consultorio = settings.CONSULTORIO
     return render(request, 'facturacion/ticket_print.html', {
         'pago': pago,
         'consultorio': consultorio,

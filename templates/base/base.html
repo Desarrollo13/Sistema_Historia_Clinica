@@ -168,11 +168,15 @@
   </a>
   {% endif %}
 
-  {% if user.es_admin %}
-  <div class="section-label">Administración</div>
+  {% if user.es_recepcion or user.es_admin %}
+  <div class="section-label">Facturación</div>
   <a href="/facturacion/" class="nav-link {% if 'facturacion' in request.path %}active{% endif %}">
     <i class="bi bi-receipt"></i> Facturación
   </a>
+  {% endif %}
+
+  {% if user.es_admin %}
+  <div class="section-label">Administración</div>
   <a href="/admin/" class="nav-link">
     <i class="bi bi-gear"></i> Configuración
   </a>

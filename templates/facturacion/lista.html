@@ -32,10 +32,10 @@
     <div class="stat-card d-flex justify-content-between align-items-center"
          style="background:linear-gradient(135deg,#1565c0,#1976d2)">
       <div>
-        <div class="number">{{ pagos|length }}</div>
-        <div class="label">Consultas cobradas</div>
+        <div class="number">{{ turnos_pendientes|length }}</div>
+        <div class="label">Consultas pendientes de cobro</div>
       </div>
-      <i class="bi bi-receipt-cutoff"></i>
+      <i class="bi bi-cash-coin"></i>
     </div>
   </div>
   <div class="col-sm-4">
@@ -53,6 +53,50 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Pendientes de cobro -->
+<div class="card mb-4">
+  <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-hourglass-split me-2 text-warning"></i>Consultas listas para cobrar</span>
+    <span class="text-muted" style="font-size:.82rem">{{ turnos_pendientes|length }} pendiente{{ turnos_pendientes|length|pluralize }}</span>
+  </div>
+
+  {% if turnos_pendientes %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Turno</th>
+          <th>Paciente</th>
+          <th>Médico</th>
+          <th>Finalizó</th>
+          <th class="text-center">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for turno in turnos_pendientes %}
+        <tr>
+          <td><code>#{{ turno.numero }}</code></td>
+          <td><strong>{{ turno.paciente.nombre_completo }}</strong></td>
+          <td>{{ turno.medico.get_full_name|default:"—" }}</td>
+          <td class="text-muted" style="font-size:.85rem">{{ turno.hora_fin|default:turno.fecha_hora|time:"H:i" }}</td>
+          <td class="text-center">
+            <a href="{% url 'facturacion:registrar' turno.pk %}" class="btn btn-primary btn-sm">
+              <i class="bi bi-cash-coin me-1"></i> Registrar pago
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-4 text-muted">
+    <i class="bi bi-check2-circle" style="font-size:2rem;color:#1a7a4a"></i>
+    <p class="mt-2 mb-0">No hay consultas finalizadas pendientes de cobro para esta fecha.</p>
+  </div>
+  {% endif %}
 </div>
 
 <!-- Tabla de pagos -->

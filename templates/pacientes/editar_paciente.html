@@ -1,0 +1,158 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Editar paciente{% endblock %}
+{% block page_title %}<i class="bi bi-pencil-square me-2" style="color:#1a7a4a"></i>Editar paciente{% endblock %}
+
+{% block contenido %}
+<form method="post">
+  {% csrf_token %}
+  <div class="row g-4">
+
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-person-vcard me-2 text-primary"></i>Datos personales
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">DNI / Cédula <span class="text-danger">*</span></label>
+              <input type="text" name="dni" class="form-control" value="{{ paciente.dni }}" required autofocus>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Apellido <span class="text-danger">*</span></label>
+              <input type="text" name="apellido" class="form-control" value="{{ paciente.apellido }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Nombre <span class="text-danger">*</span></label>
+              <input type="text" name="nombre" class="form-control" value="{{ paciente.nombre }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Fecha de nacimiento <span class="text-danger">*</span></label>
+              <input type="date" name="fecha_nacimiento" class="form-control" value="{{ paciente.fecha_nacimiento|date:'Y-m-d' }}" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Sexo <span class="text-danger">*</span></label>
+              <select name="sexo" class="form-select" required>
+                <option value="M" {% if paciente.sexo == 'M' %}selected{% endif %}>Masculino</option>
+                <option value="F" {% if paciente.sexo == 'F' %}selected{% endif %}>Femenino</option>
+                <option value="O" {% if paciente.sexo == 'O' %}selected{% endif %}>Otro</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Grupo sanguíneo</label>
+              <select name="grupo_sanguineo" class="form-select">
+                <option value="" {% if not paciente.grupo_sanguineo %}selected{% endif %}>Desconocido</option>
+                <option value="A+" {% if paciente.grupo_sanguineo == 'A+' %}selected{% endif %}>A+</option>
+                <option value="A-" {% if paciente.grupo_sanguineo == 'A-' %}selected{% endif %}>A-</option>
+                <option value="B+" {% if paciente.grupo_sanguineo == 'B+' %}selected{% endif %}>B+</option>
+                <option value="B-" {% if paciente.grupo_sanguineo == 'B-' %}selected{% endif %}>B-</option>
+                <option value="AB+" {% if paciente.grupo_sanguineo == 'AB+' %}selected{% endif %}>AB+</option>
+                <option value="AB-" {% if paciente.grupo_sanguineo == 'AB-' %}selected{% endif %}>AB-</option>
+                <option value="O+" {% if paciente.grupo_sanguineo == 'O+' %}selected{% endif %}>O+</option>
+                <option value="O-" {% if paciente.grupo_sanguineo == 'O-' %}selected{% endif %}>O-</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-telephone me-2 text-primary"></i>Contacto
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Teléfono</label>
+              <input type="tel" name="telefono" class="form-control" value="{{ paciente.telefono }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ paciente.email }}">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label">Domicilio</label>
+              <input type="text" name="domicilio" class="form-control" value="{{ paciente.domicilio }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Ciudad</label>
+              <input type="text" name="ciudad" class="form-control" value="{{ paciente.ciudad }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-clipboard2-pulse me-2 text-danger"></i>Antecedentes médicos
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Alergias conocidas</label>
+              <input type="text" name="alergias" class="form-control" value="{{ paciente.alergias }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Antecedentes patológicos</label>
+              <textarea name="antecedentes" class="form-control" rows="3">{{ paciente.antecedentes }}</textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Medicación habitual</label>
+              <textarea name="medicacion_habitual" class="form-control" rows="3">{{ paciente.medicacion_habitual }}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-shield-check me-2 text-success"></i>Cobertura médica
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Obra social / Prepaga</label>
+            <input type="text" name="obra_social" class="form-control" value="{{ paciente.obra_social }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nro. de afiliado</label>
+            <input type="text" name="nro_afiliado" class="form-control" value="{{ paciente.nro_afiliado }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-primary mb-4">
+        <div class="card-body text-center">
+          <i class="bi bi-check2-circle" style="font-size:2rem;color:#1a7a4a"></i>
+          <p class="mt-2 mb-3" style="font-size:.88rem;color:#555">
+            Guardá los cambios para actualizar la ficha del paciente sin perder su historial clínico.
+          </p>
+          <button type="submit" class="btn btn-primary w-100 py-2">
+            <i class="bi bi-save me-1"></i> Guardar cambios
+          </button>
+          <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-link btn-sm text-muted mt-1">Cancelar</a>
+        </div>
+      </div>
+
+      <div class="card border-danger">
+        <div class="card-header py-3 text-danger">
+          <i class="bi bi-person-dash me-2"></i>Dar de baja
+        </div>
+        <div class="card-body">
+          <p class="text-muted" style="font-size:.85rem">
+            La baja oculta al paciente de los listados operativos, pero conserva su historial y turnos anteriores.
+          </p>
+          <form method="post" action="{% url 'pacientes:baja' paciente.pk %}" onsubmit="return confirm('¿Dar de baja a este paciente?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger w-100">
+              <i class="bi bi-person-x me-1"></i> Dar de baja paciente
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

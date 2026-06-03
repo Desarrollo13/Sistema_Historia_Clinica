@@ -40,3 +40,6 @@ media/
 # Archivos temporales
 *.swp
 setup/
+AGENTS.MD/
+inciar_servidor_lan.bat/
+backup_db.bat/
