@@ -101,6 +101,7 @@
 
     /* ── Badges de estado ── */
     .badge-espera    { background: #fff3cd; color: #856404; }
+    .badge-programado{ background: #e0ecff; color: #0a58ca; }
     .badge-llamado   { background: #cfe2ff; color: #084298; }
     .badge-atencion  { background: #d1e7dd; color: #0a3622; }
     .badge-finalizado{ background: #e2e3e5; color: #41464b; }
@@ -127,6 +128,7 @@
 
     /* ── Alertas de estado paciente ── */
     .turno-row td:first-child { border-left: 3px solid transparent; }
+    .turno-row.programado td:first-child { border-left-color: #0d6efd; }
     .turno-row.espera   td:first-child { border-left-color: #ffc107; }
     .turno-row.llamado  td:first-child { border-left-color: #0d6efd; }
     .turno-row.atencion td:first-child { border-left-color: #198754; }
@@ -177,7 +179,7 @@
 
   {% if user.es_admin %}
   <div class="section-label">Administración</div>
-  <a href="/admin/" class="nav-link">
+  <a href="{% url 'cuentas:configuracion' %}" class="nav-link {% if 'cuentas/configuracion' in request.path %}active{% endif %}">
     <i class="bi bi-gear"></i> Configuración
   </a>
   {% endif %}

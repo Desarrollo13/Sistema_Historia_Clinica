@@ -138,13 +138,17 @@
         <div class="card-body text-center">
           <i class="bi bi-arrow-right-circle" style="font-size:2rem;color:#1a7a4a"></i>
           <p class="mt-2 mb-3" style="font-size:.88rem;color:#555">
+            {% if next_step == 'agendar' %}
+            Después de guardar podrás <strong>agendar el turno</strong> para este paciente.
+            {% else %}
             Después de guardar podrás <strong>tomar los signos vitales</strong>
             y enviar al paciente al panel del médico.
+            {% endif %}
           </p>
           <button type="submit" class="btn btn-primary w-100 py-2">
             <i class="bi bi-check-lg me-1"></i> Guardar y continuar
           </button>
-          <a href="/pacientes/" class="btn btn-link btn-sm text-muted mt-1">Cancelar</a>
+          <a href="/pacientes/{% if next_step == 'agendar' %}?modo=agenda{% endif %}" class="btn btn-link btn-sm text-muted mt-1">Cancelar</a>
         </div>
       </div>
     </div>

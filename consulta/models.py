@@ -8,6 +8,7 @@ class Turno(models.Model):
     El médico lo ve en su panel y lo atiende.
     """
     ESTADO_CHOICES = [
+        ('programado', 'Programado'),
         ('espera', 'En espera'),
         ('llamado', 'Llamado'),
         ('atencion', 'En atención'),
@@ -15,14 +16,23 @@ class Turno(models.Model):
         ('cancelado', 'Cancelado'),
     ]
 
+    CANAL_CHOICES = [
+        ('telefono', 'Telefono'),
+        ('presencial', 'Presencial'),
+        ('whatsapp', 'WhatsApp'),
+    ]
+
     paciente = models.ForeignKey('pacientes.Paciente', on_delete=models.CASCADE,
                                   related_name='turnos')
     signos = models.OneToOneField('pacientes.SignosVitales', on_delete=models.SET_NULL,
                                    null=True, blank=True, related_name='turno')
     medico = models.ForeignKey('cuentas.Usuario', on_delete=models.SET_NULL,
-                                null=True, blank=True, related_name='turnos_asignados',
-                                limit_choices_to={'rol': 'medico'})
+                                 null=True, blank=True, related_name='turnos_asignados',
+                                 limit_choices_to={'rol': 'medico'})
     estado = models.CharField(max_length=15, choices=ESTADO_CHOICES, default='espera')
+    canal_solicitud = models.CharField(max_length=15, choices=CANAL_CHOICES, default='presencial')
+    motivo_turno = models.CharField(max_length=200, blank=True)
+    observaciones_recepcion = models.TextField(blank=True)
     fecha_hora = models.DateTimeField(default=timezone.now)
     hora_llamado = models.DateTimeField(null=True, blank=True)
     hora_inicio_atencion = models.DateTimeField(null=True, blank=True)

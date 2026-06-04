@@ -10,6 +10,25 @@
 <div class="row g-4">
   <div class="col-lg-8">
 
+    {% if turno_programado %}
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+        <div>
+          <strong>Turno programado detectado</strong><br>
+          <span style="font-size:.9rem">
+            {{ turno_programado.fecha_hora|date:"d/m/Y H:i" }}
+            {% if turno_programado.medico %}· Dr/a. {{ turno_programado.medico.get_full_name|default:turno_programado.medico.username }}{% endif %}
+            · {{ turno_programado.get_canal_solicitud_display }}
+          </span>
+          {% if turno_programado.motivo_turno %}
+          <div class="mt-1" style="font-size:.88rem"><strong>Motivo agendado:</strong> {{ turno_programado.motivo_turno }}</div>
+          {% endif %}
+        </div>
+        <span class="badge badge-programado rounded-pill">{{ turno_programado.get_estado_display }}</span>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Info rápida del paciente -->
     <div class="card mb-4" style="border-left: 4px solid #1a7a4a;">
       <div class="card-body py-3">
@@ -134,7 +153,7 @@
         </div>
         <div class="card-body">
           <textarea name="motivo_consulta" class="form-control" rows="3"
-                    placeholder="Describa el motivo principal de la consulta…" required></textarea>
+                    placeholder="Describa el motivo principal de la consulta…" required>{% if turno_programado %}{{ turno_programado.motivo_turno }}{% endif %}</textarea>
           <div class="mt-3">
             <label class="form-label">Observaciones de recepción</label>
             <textarea name="observaciones" class="form-control" rows="2"
@@ -154,7 +173,7 @@
             <div class="form-check mb-2">
               <input class="form-check-input" type="radio" name="medico_id"
                      id="med{{ medico.pk }}" value="{{ medico.pk }}"
-                     {% if forloop.first %}checked{% endif %}>
+                     {% if turno_programado and turno_programado.medico_id == medico.pk or not turno_programado and forloop.first %}checked{% endif %}>
               <label class="form-check-label" for="med{{ medico.pk }}">
                 <strong>Dr/a. {{ medico.get_full_name }}</strong>
                 {% if medico.especialidad %}
@@ -166,7 +185,7 @@
           {% else %}
             <div class="alert alert-warning py-2 mb-0" style="font-size:.85rem">
               <i class="bi bi-exclamation-triangle me-1"></i>
-              No hay médicos activos. Configure al menos un médico desde el panel de administración.
+              No hay médicos activos. Configure al menos un médico desde Configuracion > Gestionar medicos.
             </div>
           {% endif %}
         </div>
@@ -204,6 +223,8 @@
               <span>💉 {{ t.signos.saturacion_o2|default:"—" }}%</span>
             </div>
             <div class="text-muted mt-1" style="font-size:.8rem">{{ t.signos.motivo_consulta|truncatechars:60 }}</div>
+            {% elif t.motivo_turno %}
+            <div class="text-muted mt-1" style="font-size:.8rem">{{ t.motivo_turno|truncatechars:60 }}</div>
             {% endif %}
           </div>
           {% endfor %}

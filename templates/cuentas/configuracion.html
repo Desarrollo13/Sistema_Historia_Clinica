@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}Configuracion{% endblock %}
+{% block page_title %}Configuracion{% endblock %}
+
+{% block contenido %}
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card" style="background: linear-gradient(135deg, #1a7a4a, #23a36a);">
+      <div class="number">{{ total_usuarios }}</div>
+      <div class="label">Usuarios registrados</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="background: linear-gradient(135deg, #1565c0, #1e88e5);">
+      <div class="number">{{ total_medicos }}</div>
+      <div class="label">Medicos activos</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="background: linear-gradient(135deg, #5f6368, #7b8087);">
+      <div class="number">{{ total_recepcion }}</div>
+      <div class="label">Recepcionistas activos</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <h5 class="mb-2">Gestionar usuarios</h5>
+        <p class="text-muted mb-4">Alta y edicion de recepcionistas, administradores y otros usuarios del sistema.</p>
+        <a href="{% url 'cuentas:lista_usuarios' %}" class="btn btn-primary">
+          <i class="bi bi-people me-1"></i> Abrir usuarios
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <h5 class="mb-2">Gestionar medicos</h5>
+        <p class="text-muted mb-4">Carga simple de medicos con especialidad, matricula y estado activo.</p>
+        <a href="{% url 'cuentas:lista_medicos' %}" class="btn btn-primary">
+          <i class="bi bi-person-badge me-1"></i> Abrir medicos
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

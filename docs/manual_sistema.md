@@ -7,12 +7,13 @@ Este sistema permite trabajar la atencion de un consultorio medico en red local 
 Flujo principal:
 
 1. Recepcion registra o busca al paciente.
-2. Recepcion toma signos vitales.
-3. El sistema crea un turno y lo envia al medico.
-4. El medico atiende al paciente y completa la historia clinica.
-5. Se puede abrir la receta en PDF.
-6. Recepcion o administracion registra el pago.
-7. El sistema genera el ticket de cobro.
+2. Si el turno se solicita por telefono, presencial o WhatsApp, recepcion agenda fecha, hora y medico.
+3. Cuando el paciente llega, recepcion toma signos vitales.
+4. El sistema confirma el turno del dia y lo envia al medico.
+5. El medico atiende al paciente y completa la historia clinica.
+6. Se puede abrir la receta en PDF.
+7. Recepcion o administracion registra el pago.
+8. El sistema genera el ticket de cobro.
 
 ## 2. Arquitectura general
 
@@ -33,6 +34,7 @@ Flujo principal:
 - Registra pacientes.
 - Edita pacientes.
 - Da de baja pacientes y los reactiva.
+- Agenda turnos solicitados por telefono, presencial o WhatsApp.
 - Toma signos vitales.
 - Registra pagos.
 - Imprime tickets.
@@ -49,7 +51,8 @@ Flujo principal:
 ### Administrador
 
 - Tiene acceso general.
-- Puede usar el admin de Django.
+- En el menu lateral usa `Configuracion` para gestionar usuarios y medicos desde una pantalla simple.
+- El admin tecnico de Django queda fuera del flujo normal de uso.
 - Puede operar facturacion.
 
 ## 4. Logica funcional del sistema
@@ -65,10 +68,25 @@ Flujo principal:
 
 ### 4.2 Signos vitales y turnos
 
+- Los turnos pueden cargarse por anticipado desde recepcion.
+- El turno programado guarda canal de solicitud: `telefono`, `presencial` o `whatsapp`.
+- El turno programado guarda fecha, hora, medico, motivo y observaciones de recepcion.
+- Al agendar, el sistema valida que el medico no tenga otro turno en la misma fecha y hora.
+- Al agendar, el sistema valida que el paciente no tenga otro turno en la misma fecha y hora.
 - La vista de signos vitales crea un registro `SignosVitales`.
-- En el mismo paso se crea un `Turno`.
+- Si el paciente ya tenia un turno programado para ese dia, se reutiliza ese turno y pasa a estado `espera`.
+- Si no existia un turno programado, en ese paso se crea un `Turno` nuevo.
 - El turno queda asignado a un medico.
 - El numero de turno se genera en orden por dia.
+
+### 4.2.1 Agenda operativa
+
+- Desde la lista o ficha del paciente, recepcion puede usar `Agendar turno`.
+- Si el paciente no existe, primero se crea y luego se agenda.
+- La ficha del paciente muestra los proximos turnos programados.
+- Desde la ficha se puede `Recepcionar` un turno programado para abrir la toma de signos del mismo turno.
+- El estado `programado` se usa antes de la llegada del paciente.
+- El estado `espera` se usa cuando el paciente ya fue recepcionado y esta listo para el medico.
 
 ### 4.3 Consulta medica
 
@@ -93,6 +111,17 @@ Flujo principal:
 - Al registrar un pago se crea un `Pago`.
 - Cada pago genera numero de recibo automatico.
 - Si un turno ya tiene pago, el sistema redirige al ticket existente.
+
+### 4.6 Configuracion operativa
+
+- El acceso aparece solo para administradores.
+- El menu `Configuracion` ya no envia al panel tecnico `/admin/`.
+- La pantalla muestra dos accesos simples:
+  - `Gestionar usuarios`
+  - `Gestionar medicos`
+- `Gestionar usuarios` permite crear y editar usuarios del sistema sin entrar al admin tecnico.
+- `Gestionar medicos` permite crear y editar medicos con especialidad, matricula, estado activo y clave de acceso.
+- Al editar un usuario o medico, la contraseña puede dejarse vacia para conservar la actual.
 
 ## 5. Configuracion para red local
 
@@ -210,11 +239,17 @@ Actualmente el sistema tiene pruebas automaticas reales para estos casos:
 - login de medico redirige al panel medico
 - login de recepcion redirige a pacientes
 - logout redirige al login sin romper plantilla
+- administrador puede abrir la pantalla de configuracion
+- recepcion no puede entrar a configuracion
+- administrador puede crear medicos desde el formulario simple
 
 ### pacientes
 
 - toma de signos crea `SignosVitales`
 - toma de signos crea `Turno`
+- recepcion puede agendar un turno con canal y medico
+- no permite agendar el mismo horario para el mismo medico
+- al tomar signos se reutiliza el turno programado del dia
 - editar paciente actualiza datos
 - baja logica deja `activo=False`
 - lista principal oculta inactivos
@@ -236,7 +271,7 @@ Actualmente el sistema tiene pruebas automaticas reales para estos casos:
 
 Estado actual de la suite enfocada:
 
-- `13` tests OK
+- `19` tests OK
 
 ## 12. Prueba manual recomendada antes de puesta en marcha
 
@@ -245,19 +280,25 @@ Estado actual de la suite enfocada:
 3. Entrar desde otra PC de la red usando `http://192.168.1.105:8000/`.
 4. Login como recepcion.
 5. Crear o editar paciente.
-6. Tomar signos vitales.
-7. Login como medico.
-8. Llamar paciente, iniciar consulta y guardar historia.
-9. Abrir receta PDF.
-10. Volver a recepcion y registrar pago.
-11. Abrir ticket e imprimir.
-12. Probar baja y reactivacion de paciente.
+6. Agendar un turno futuro por telefono, presencial o WhatsApp.
+7. Verificar que el turno aparezca en la ficha del paciente.
+8. Recepcionar ese turno y tomar signos vitales.
+9. Login como medico.
+10. Llamar paciente, iniciar consulta y guardar historia.
+11. Abrir receta PDF.
+12. Volver a recepcion y registrar pago.
+13. Abrir ticket e imprimir.
+14. Probar baja y reactivacion de paciente.
+15. Login como administrador y abrir `Configuracion`.
+16. Crear o editar un usuario.
+17. Crear o editar un medico.
 
 ## 13. Estado final actual
 
 El sistema ya cuenta con:
 
 - flujo funcional de recepcion, consulta y facturacion
+- agenda previa de turnos con validacion de disponibilidad
 - manejo de pacientes activos e inactivos
 - receta PDF
 - tickets de pago

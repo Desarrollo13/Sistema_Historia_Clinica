@@ -1,7 +1,5 @@
 # Entorno virtual
-
 venv/
-
 
 # Variables de entorno
 .env
@@ -16,6 +14,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Archivos de logs
 *.log
@@ -24,22 +26,19 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Archivos de VS Code
+# Archivos de editor
 .vscode/
-
-# Archivos de migraciones (opcional, depende tu estrategia)
-# */migrations/*
-# !*/migrations/__init__.py
+.idea/
 
 # Archivos estáticos recolectados
 staticfiles/
 
-# Media (si subís archivos)
+# Media y backups locales
 media/
+backups/
 
 # Archivos temporales
 *.swp
-setup/
-AGENTS.MD/
-inciar_servidor_lan.bat/
-backup_db.bat/
+*.tmp
+*.bak
+*.orig

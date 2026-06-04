@@ -1,0 +1,113 @@
+{% extends "base/base.html" %}
+
+{% block titulo %}Agendar turno{% endblock %}
+{% block page_title %}
+  <i class="bi bi-calendar-plus me-2" style="color:#1a7a4a"></i>
+  Agendar turno · <span style="color:#1565c0">{{ paciente.nombre_completo }}</span>
+{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card mb-4" style="border-left: 4px solid #1a7a4a;">
+      <div class="card-body py-3">
+        <div class="row text-center g-0">
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">Paciente</div>
+            <strong>{{ paciente.nombre_completo }}</strong>
+          </div>
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">DNI</div>
+            <strong>{{ paciente.dni }}</strong>
+          </div>
+          <div class="col">
+            <div style="font-size:.75rem;color:#888">Telefono</div>
+            <strong>{{ paciente.telefono|default:"—" }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="card mb-4">
+        <div class="card-header py-3">
+          <i class="bi bi-calendar2-week me-2 text-primary"></i>Datos del turno
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Fecha y hora</label>
+              <input type="datetime-local" name="fecha_hora" class="form-control" min="{{ fecha_minima }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Canal de solicitud</label>
+              <select name="canal_solicitud" class="form-select">
+                {% for value, label in canales %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Medico</label>
+              <select name="medico_id" class="form-select" required {% if not medicos %}disabled{% endif %}>
+                <option value="">Seleccionar medico...</option>
+                {% for medico in medicos %}
+                <option value="{{ medico.pk }}">Dr/a. {{ medico.get_full_name|default:medico.username }}{% if medico.especialidad %} · {{ medico.especialidad }}{% endif %}</option>
+                {% endfor %}
+              </select>
+              {% if not medicos %}
+              <div class="form-text text-danger">No hay medicos activos cargados en configuracion.</div>
+              {% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Motivo del turno</label>
+              <input type="text" name="motivo_turno" class="form-control" maxlength="200" placeholder="Ej: control, receta, dolor abdominal">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Observaciones de recepcion</label>
+              <textarea name="observaciones_recepcion" class="form-control" rows="3" placeholder="Notas sobre la solicitud, cobertura o recordatorios..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4" {% if not medicos %}disabled{% endif %}>
+          <i class="bi bi-check2-circle me-1"></i> Guardar turno
+        </button>
+        <a href="{% url 'pacientes:detalle' paciente.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header py-3">
+        <i class="bi bi-clock-history me-2"></i>Proximos turnos
+      </div>
+      <div class="card-body p-0">
+        {% if turnos_programados %}
+          {% for turno in turnos_programados %}
+          <div class="p-3 {% if not forloop.last %}border-bottom{% endif %}">
+            <div class="fw-semibold">{{ turno.fecha_hora|date:"d/m/Y H:i" }}</div>
+            <div class="text-muted" style="font-size:.85rem">
+              {% if turno.medico %}Dr/a. {{ turno.medico.get_full_name|default:turno.medico.username }}{% endif %}
+              · {{ turno.get_canal_solicitud_display }}
+            </div>
+            {% if turno.motivo_turno %}
+            <div class="mt-2" style="font-size:.88rem">{{ turno.motivo_turno }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-calendar2-x" style="font-size:1.8rem"></i>
+            <p class="mt-2 mb-0" style="font-size:.85rem">Sin turnos programados.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

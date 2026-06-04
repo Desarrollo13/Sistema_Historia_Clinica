@@ -9,6 +9,7 @@ urlpatterns = [
     path('inactivos/',    views.lista_pacientes_inactivos, name='inactivos'),
     path('nuevo/',        views.nuevo_paciente,       name='nuevo'),
     path('buscar/',       views.buscar_paciente_ajax, name='buscar_ajax'),
+    path('<int:paciente_id>/agendar/', views.agendar_turno, name='agendar_turno'),
     path('<int:pk>/editar/', views.editar_paciente,   name='editar'),
     path('<int:pk>/baja/',   views.desactivar_paciente, name='baja'),
     path('<int:pk>/reactivar/', views.reactivar_paciente, name='reactivar'),

@@ -7,6 +7,9 @@
 {% endblock %}
 
 {% block topbar_actions %}
+  <a href="{% url 'pacientes:agendar_turno' paciente.pk %}" class="btn btn-outline-info btn-sm px-3">
+    <i class="bi bi-calendar-plus me-1"></i> Agendar turno
+  </a>
   <a href="{% url 'pacientes:editar' paciente.pk %}" class="btn btn-outline-warning btn-sm px-3">
     <i class="bi bi-pencil me-1"></i> Editar
   </a>
@@ -92,6 +95,40 @@
 
   <div class="col-lg-8">
     <div class="card">
+      {% if turnos_programados %}
+      <div class="card-header py-3 d-flex justify-content-between align-items-center border-bottom">
+        <span><i class="bi bi-calendar2-check me-2 text-primary"></i>Turnos programados</span>
+        <span class="text-muted" style="font-size:.82rem">{{ turnos_programados|length }} pendiente{{ turnos_programados|length|pluralize }}</span>
+      </div>
+      <div class="card-body p-0 border-bottom">
+        {% for turno in turnos_programados %}
+        <div class="p-3 {% if not forloop.last %}border-bottom{% endif %}">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+              <div class="fw-semibold">{{ turno.fecha_hora|date:"d/m/Y H:i" }}</div>
+              <div class="text-muted" style="font-size:.84rem">
+                Turno #{{ turno.numero }}
+                {% if turno.medico %}· Dr/a. {{ turno.medico.get_full_name|default:turno.medico.username }}{% endif %}
+                · {{ turno.get_canal_solicitud_display }}
+              </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+              <span class="badge badge-{{ turno.estado }} rounded-pill">{{ turno.get_estado_display }}</span>
+              <a href="{% url 'pacientes:signos_vitales' paciente.pk %}?turno_id={{ turno.pk }}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-heart-pulse me-1"></i> Recepcionar
+              </a>
+            </div>
+          </div>
+          {% if turno.motivo_turno %}
+          <div class="mt-2" style="font-size:.9rem"><strong>Motivo:</strong> {{ turno.motivo_turno }}</div>
+          {% endif %}
+          {% if turno.observaciones_recepcion %}
+          <div class="mt-1 text-muted" style="font-size:.88rem">{{ turno.observaciones_recepcion }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
       <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <span><i class="bi bi-clock-history me-2"></i>Historial clínico</span>
         <span class="text-muted" style="font-size:.82rem">{{ historial|length }} consulta{{ historial|length|pluralize }}</span>

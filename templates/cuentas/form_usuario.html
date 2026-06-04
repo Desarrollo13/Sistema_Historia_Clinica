@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const roleSelect = document.getElementById('id_rol');
+    const medicoFields = document.querySelectorAll('[data-medico-only]');
+
+    function syncMedicoFields() {
+      if (!roleSelect) {
+        return;
+      }
+      const isMedico = roleSelect.value === 'medico';
+      medicoFields.forEach((field) => {
+        field.style.display = isMedico ? '' : 'none';
+      });
+    }
+
+    if (roleSelect) {
+      roleSelect.addEventListener('change', syncMedicoFields);
+      syncMedicoFields();
+    }
+  }());
+</script>
+{% endblock %}
+
+{% block contenido %}
+<div class="card" style="max-width: 900px;">
+  <div class="card-body p-4">
+    <form method="post" action="{% if guardar_args %}{% url guardar_url guardar_args.0 %}{% else %}{% url guardar_url %}{% endif %}">
+      {% csrf_token %}
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">{{ titulo }}</h5>
+        <a href="{% url volver_url %}" class="btn btn-outline-secondary">Volver</a>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nombre</label>
+          <input type="text" name="first_name" class="form-control" value="{{ usuario_obj.first_name|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Apellido</label>
+          <input type="text" name="last_name" class="form-control" value="{{ usuario_obj.last_name|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Usuario</label>
+          <input type="text" name="username" class="form-control" value="{{ usuario_obj.username|default:'' }}" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="{{ usuario_obj.email|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Telefono</label>
+          <input type="text" name="telefono" class="form-control" value="{{ usuario_obj.telefono|default:'' }}">
+        </div>
+        {% if solo_medicos %}
+        <input type="hidden" name="rol" value="medico">
+        {% else %}
+        <div class="col-md-6">
+          <label class="form-label">Rol</label>
+          <select name="rol" id="id_rol" class="form-select">
+            {% for value, label in roles %}
+            <option value="{{ value }}" {% if usuario_obj.rol == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <div class="col-md-6" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
+          <label class="form-label">Especialidad</label>
+          <input type="text" name="especialidad" class="form-control" value="{{ usuario_obj.especialidad|default:'' }}">
+        </div>
+        <div class="col-md-6" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
+          <label class="form-label">Matricula</label>
+          <input type="text" name="matricula" class="form-control" value="{{ usuario_obj.matricula|default:'' }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">{% if usuario_obj %}Nueva contraseña{% else %}Contraseña{% endif %}</label>
+          <input type="password" name="password" class="form-control" {% if not usuario_obj %}required{% endif %}>
+          <div class="form-text">{% if usuario_obj %}Dejar en blanco para conservar la actual.{% else %}La persona la usará para iniciar sesión.{% endif %}</div>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+          <div class="form-check mb-2">
+            <input type="checkbox" name="is_active" class="form-check-input" id="id_is_active" {% if usuario_obj.is_active or not usuario_obj %}checked{% endif %}>
+            <label class="form-check-label" for="id_is_active">Usuario activo</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url volver_url %}" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
