@@ -12,80 +12,171 @@
       --verde:     #1a7a4a;
       --verde-claro: #e8f5ee;
       --azul-med:  #1565c0;
-      --gris-bg:   #f4f6f9;
+      --gris-bg:   #f4f7f9;
+      --tinta:     #1b2a3b;
+      --texto-suave:#5c6b78;
+      --texto-mute:#71808d;
+      --borde:     rgba(27, 42, 59, 0.08);
+      --borde-suave: rgba(27, 42, 59, 0.06);
+      --superficie:#fbfcfd;
+      --superficie-inset:#ffffff;
     }
-    body { background: var(--gris-bg); font-family: 'Segoe UI', sans-serif; }
+    body { background: var(--gris-bg); font-family: 'Segoe UI', sans-serif; color: var(--tinta); }
 
     /* ── Sidebar ── */
     #sidebar {
       width: var(--sidebar-w);
       min-height: 100vh;
-      background: #1b2a3b;
+      background: var(--gris-bg);
+      border-right: 1px solid var(--borde);
       position: fixed; top: 0; left: 0; z-index: 100;
       display: flex; flex-direction: column;
       transition: width .25s;
     }
     #sidebar .brand {
-      padding: 20px 16px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 24px 18px 16px;
+      border-bottom: 1px solid var(--borde);
     }
-    #sidebar .brand h6 { color: #fff; margin: 0; font-size: .85rem; opacity: .7; }
-    #sidebar .brand strong { color: #4fc98e; font-size: 1.05rem; letter-spacing: -.3px; }
+    #sidebar .brand h6 {
+      color: var(--texto-mute);
+      margin: 0 0 8px;
+      font-size: .76rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    #sidebar .brand strong {
+      color: var(--tinta);
+      font-size: 1.05rem;
+      letter-spacing: -.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #sidebar .brand strong i {
+      color: var(--verde);
+      font-size: 1.1rem;
+    }
 
     #sidebar .nav-link {
-      color: rgba(255,255,255,.65);
-      padding: 10px 20px;
-      border-radius: 0;
+      color: var(--texto-suave);
+      padding: 11px 14px;
+      margin: 0 12px;
+      border-radius: 12px;
       display: flex; align-items: center; gap: 10px;
       font-size: .9rem;
-      transition: background .15s, color .15s;
+      font-weight: 600;
+      transition: background .15s, color .15s, border-color .15s;
+      border: 1px solid transparent;
     }
     #sidebar .nav-link:hover, #sidebar .nav-link.active {
-      background: rgba(255,255,255,.07);
-      color: #fff;
+      background: var(--superficie);
+      color: var(--tinta);
+      border-color: var(--borde-suave);
     }
-    #sidebar .nav-link.active { border-left: 3px solid #4fc98e; }
-    #sidebar .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+    #sidebar .nav-link.active {
+      background: var(--verde-claro);
+      color: var(--verde);
+      border-color: rgba(26, 122, 74, .12);
+    }
+    #sidebar .nav-link i {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+      color: inherit;
+    }
     #sidebar .section-label {
-      color: rgba(255,255,255,.35);
+      color: var(--texto-mute);
       font-size: .7rem;
       text-transform: uppercase;
-      letter-spacing: .8px;
-      padding: 14px 20px 4px;
+      letter-spacing: .08em;
+      padding: 18px 20px 8px;
+      font-weight: 700;
     }
     #sidebar .user-block {
       margin-top: auto;
-      padding: 14px 16px;
-      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 16px 18px 20px;
+      border-top: 1px solid var(--borde);
       display: flex; align-items: center; gap: 10px;
     }
     #sidebar .user-block .avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: #4fc98e; color: #1b2a3b;
+      width: 38px; height: 38px; border-radius: 12px;
+      background: var(--verde-claro); color: var(--verde);
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: .85rem; flex-shrink: 0;
+      border: 1px solid rgba(26, 122, 74, .12);
     }
-    #sidebar .user-block .info small { color: rgba(255,255,255,.45); font-size: .72rem; display: block; }
-    #sidebar .user-block .info span  { color: #fff; font-size: .82rem; }
+    #sidebar .user-block .info small { color: var(--texto-mute); font-size: .72rem; display: block; }
+    #sidebar .user-block .info span  { color: var(--tinta); font-size: .82rem; font-weight: 600; }
+    #sidebar .logout-link {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--texto-suave);
+      border: 1px solid transparent;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    #sidebar .logout-link:hover {
+      background: var(--superficie);
+      color: var(--tinta);
+      border-color: var(--borde-suave);
+    }
 
     /* ── Contenido principal ── */
     #main { margin-left: var(--sidebar-w); min-height: 100vh; }
 
     /* ── Topbar ── */
     #topbar {
-      background: #fff;
-      border-bottom: 1px solid #e0e4ea;
-      padding: 0 24px;
-      height: 56px;
+      background: rgba(244, 247, 249, 0.92);
+      border-bottom: 1px solid var(--borde);
+      padding: 14px 24px;
+      min-height: 72px;
       display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; z-index: 90;
+      backdrop-filter: blur(10px);
     }
-    #topbar .page-title { font-size: 1rem; font-weight: 600; color: #1b2a3b; margin: 0; }
+    #topbar .page-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--tinta);
+      margin: 0;
+      letter-spacing: -.02em;
+    }
     #topbar .breadcrumb  { margin: 0; font-size: .8rem; }
+    #topbar .topbar-kicker {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--texto-mute);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 700;
+    }
+    #topbar .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--texto-suave);
+      font-size: .84rem;
+    }
 
     /* ── Cards ── */
-    .card { border: none; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
-    .card-header { background: #fff; border-bottom: 1px solid #f0f0f0; font-weight: 600; border-radius: 12px 12px 0 0 !important; }
+    .card {
+      border: 1px solid var(--borde);
+      border-radius: 18px;
+      background: var(--superficie);
+      box-shadow: none;
+    }
+    .card-header {
+      background: var(--superficie);
+      border-bottom: 1px solid var(--borde-suave);
+      font-weight: 600;
+      border-radius: 18px 18px 0 0 !important;
+    }
 
     /* ── Stat cards ── */
     .stat-card { border-radius: 12px; padding: 18px 20px; color: #fff; }
@@ -94,8 +185,8 @@
     .stat-card i { font-size: 2rem; opacity: .25; }
 
     /* ── Tabla ── */
-    .table thead th { background: #f8f9fb; font-size: .8rem; text-transform: uppercase;
-                      letter-spacing: .4px; color: #666; font-weight: 600; border-bottom: 2px solid #eee; }
+    .table thead th { background: #f3f6f8; font-size: .8rem; text-transform: uppercase;
+                      letter-spacing: .4px; color: var(--texto-mute); font-weight: 700; border-bottom: 1px solid var(--borde); }
     .table tbody tr:hover { background: #f8fbff; }
     .table td { vertical-align: middle; font-size: .9rem; }
 
@@ -109,7 +200,7 @@
     /* ── Forms ── */
     .form-label { font-size: .85rem; font-weight: 600; color: #444; }
     .form-control, .form-select {
-      border-radius: 8px; border-color: #dde1e7;
+      border-radius: 10px; border-color: #dde1e7;
       font-size: .9rem;
     }
     .form-control:focus, .form-select:focus {
@@ -136,9 +227,24 @@
     /* ── Receta ── */
     .receta-item { background: #f8fffe; border: 1px solid #c3e6d8; border-radius: 8px; padding: 12px; }
 
+    .content-shell {
+      padding: 24px;
+    }
+
+    .alert {
+      border-radius: 14px;
+      border-width: 1px;
+    }
+
     @media (max-width: 768px) {
       #sidebar { width: 0; overflow: hidden; }
       #main { margin-left: 0; }
+      #topbar {
+        padding: 14px 16px;
+      }
+      .content-shell {
+        padding: 16px;
+      }
     }
   </style>
   {% block extra_css %}{% endblock %}
@@ -150,7 +256,7 @@
 <nav id="sidebar">
   <div class="brand">
     <h6>SISTEMA DE</h6>
-    <strong><i class="bi bi-heart-pulse-fill me-1"></i>Historia Clínica</strong>
+    <strong><i class="bi bi-heart-pulse-fill"></i>Historia Clínica</strong>
   </div>
 
   {% if user.es_recepcion or user.es_admin %}
@@ -190,7 +296,7 @@
       <span>{{ user.get_full_name|default:user.username }}</span>
       <small>{{ user.get_rol_display }}</small>
     </div>
-    <a href="/cuentas/logout/" class="ms-auto text-white-50" title="Cerrar sesión">
+    <a href="/cuentas/logout/" class="ms-auto logout-link" title="Cerrar sesión">
       <i class="bi bi-box-arrow-right"></i>
     </a>
   </div>
@@ -202,15 +308,16 @@
   {% if user.is_authenticated %}
   <div id="topbar">
     <div>
+      <span class="topbar-kicker">Operacion clinica</span>
       <p class="page-title">{% block page_title %}{% endblock %}</p>
     </div>
-    <div class="d-flex align-items-center gap-3">
+    <div class="topbar-actions">
       {% block topbar_actions %}{% endblock %}
     </div>
   </div>
   {% endif %}
 
-  <div class="p-4">
+  <div class="content-shell">
     {% for msg in messages %}
     <div class="alert alert-{{ msg.tags|default:'info' }} alert-dismissible fade show" role="alert">
       {{ msg }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

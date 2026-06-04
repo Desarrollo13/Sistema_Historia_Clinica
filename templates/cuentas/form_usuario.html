@@ -3,6 +3,188 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 
+{% block extra_css %}
+<style>
+  .staff-form-shell {
+    max-width: 980px;
+    display: grid;
+    gap: 20px;
+  }
+
+  .staff-form-hero,
+  .staff-form-card,
+  .staff-form-side {
+    background: #fbfcfd;
+    border: 1px solid rgba(27, 42, 59, 0.08);
+    border-radius: 18px;
+  }
+
+  .staff-form-hero,
+  .staff-form-card,
+  .staff-form-side {
+    padding: 24px;
+  }
+
+  .staff-form-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef5f2;
+    color: #1a7a4a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .staff-form-hero h2 {
+    margin: 16px 0 10px;
+    font-size: 1.9rem;
+    letter-spacing: -0.03em;
+    color: #1b2a3b;
+  }
+
+  .staff-form-hero p,
+  .staff-form-note,
+  .staff-form-side p {
+    margin: 0;
+    color: #5c6b78;
+    line-height: 1.6;
+  }
+
+  .staff-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .staff-form-card {
+    display: grid;
+    gap: 22px;
+  }
+
+  .staff-form-section {
+    display: grid;
+    gap: 16px;
+  }
+
+  .staff-form-section-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(27, 42, 59, 0.08);
+  }
+
+  .staff-form-section-header h5 {
+    margin: 0;
+    color: #1b2a3b;
+    font-size: 1rem;
+  }
+
+  .staff-form-section-header p {
+    margin: 6px 0 0;
+    color: #71808d;
+    font-size: 0.9rem;
+  }
+
+  .staff-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .staff-form-field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .staff-form-field.is-full {
+    grid-column: 1 / -1;
+  }
+
+  .staff-form-field .form-control,
+  .staff-form-field .form-select {
+    min-height: 46px;
+    background: #f4f7f9;
+    border-color: rgba(27, 42, 59, 0.09);
+  }
+
+  .staff-form-hint {
+    color: #71808d;
+    font-size: 0.82rem;
+  }
+
+  .staff-form-toggle {
+    padding: 16px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(27, 42, 59, 0.06);
+  }
+
+  .staff-form-toggle .form-check {
+    margin: 0;
+  }
+
+  .staff-form-side {
+    display: grid;
+    gap: 18px;
+  }
+
+  .staff-form-side-block {
+    padding: 16px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(27, 42, 59, 0.06);
+  }
+
+  .staff-form-side-block h6 {
+    margin: 0 0 8px;
+    color: #1b2a3b;
+    font-size: 0.95rem;
+  }
+
+  .staff-form-side-block p {
+    font-size: 0.9rem;
+  }
+
+  .staff-form-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #5c6b78;
+    display: grid;
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+
+  .staff-form-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 991.98px) {
+    .staff-form-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .staff-form-hero h2 {
+      font-size: 1.55rem;
+    }
+
+    .staff-form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .staff-form-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
   (function () {
@@ -28,75 +210,133 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="card" style="max-width: 900px;">
-  <div class="card-body p-4">
-    <form method="post" action="{% if guardar_args %}{% url guardar_url guardar_args.0 %}{% else %}{% url guardar_url %}{% endif %}">
-      {% csrf_token %}
+<div class="staff-form-shell">
+  <section class="staff-form-hero">
+    <span class="staff-form-kicker"><i class="bi bi-person-gear"></i> Administracion de accesos</span>
+    <h2>{{ titulo }}</h2>
+    <p>
+      {% if solo_medicos %}
+      Completa los datos profesionales y administrativos del medico para mantener el plantel clinico correctamente identificado.
+      {% else %}
+      Configura identidad, rol y acceso al sistema en una sola vista, con los campos agrupados para reducir errores de carga.
+      {% endif %}
+    </p>
+  </section>
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="mb-0">{{ titulo }}</h5>
-        <a href="{% url volver_url %}" class="btn btn-outline-secondary">Volver</a>
-      </div>
+  <form method="post" action="{% if guardar_args %}{% url guardar_url guardar_args.0 %}{% else %}{% url guardar_url %}{% endif %}">
+    {% csrf_token %}
 
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Nombre</label>
-          <input type="text" name="first_name" class="form-control" value="{{ usuario_obj.first_name|default:'' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Apellido</label>
-          <input type="text" name="last_name" class="form-control" value="{{ usuario_obj.last_name|default:'' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Usuario</label>
-          <input type="text" name="username" class="form-control" value="{{ usuario_obj.username|default:'' }}" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" value="{{ usuario_obj.email|default:'' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Telefono</label>
-          <input type="text" name="telefono" class="form-control" value="{{ usuario_obj.telefono|default:'' }}">
-        </div>
-        {% if solo_medicos %}
-        <input type="hidden" name="rol" value="medico">
-        {% else %}
-        <div class="col-md-6">
-          <label class="form-label">Rol</label>
-          <select name="rol" id="id_rol" class="form-select">
-            {% for value, label in roles %}
-            <option value="{{ value }}" {% if usuario_obj.rol == value %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        {% endif %}
-        <div class="col-md-6" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
-          <label class="form-label">Especialidad</label>
-          <input type="text" name="especialidad" class="form-control" value="{{ usuario_obj.especialidad|default:'' }}">
-        </div>
-        <div class="col-md-6" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
-          <label class="form-label">Matricula</label>
-          <input type="text" name="matricula" class="form-control" value="{{ usuario_obj.matricula|default:'' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">{% if usuario_obj %}Nueva contraseña{% else %}Contraseña{% endif %}</label>
-          <input type="password" name="password" class="form-control" {% if not usuario_obj %}required{% endif %}>
-          <div class="form-text">{% if usuario_obj %}Dejar en blanco para conservar la actual.{% else %}La persona la usará para iniciar sesión.{% endif %}</div>
-        </div>
-        <div class="col-md-6 d-flex align-items-end">
-          <div class="form-check mb-2">
-            <input type="checkbox" name="is_active" class="form-check-input" id="id_is_active" {% if usuario_obj.is_active or not usuario_obj %}checked{% endif %}>
-            <label class="form-check-label" for="id_is_active">Usuario activo</label>
+    <div class="staff-form-layout">
+      <section class="staff-form-card">
+        <div class="staff-form-section">
+          <div class="staff-form-section-header">
+            <h5>Identidad del perfil</h5>
+            <p>Datos visibles para identificar a la persona dentro del sistema.</p>
+          </div>
+
+          <div class="staff-form-grid">
+            <div class="staff-form-field">
+              <label class="form-label">Nombre</label>
+              <input type="text" name="first_name" class="form-control" value="{{ usuario_obj.first_name|default:'' }}">
+            </div>
+            <div class="staff-form-field">
+              <label class="form-label">Apellido</label>
+              <input type="text" name="last_name" class="form-control" value="{{ usuario_obj.last_name|default:'' }}">
+            </div>
+            <div class="staff-form-field">
+              <label class="form-label">Usuario</label>
+              <input type="text" name="username" class="form-control" value="{{ usuario_obj.username|default:'' }}" required>
+              <div class="staff-form-hint">Identificador unico para iniciar sesion.</div>
+            </div>
+            <div class="staff-form-field">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ usuario_obj.email|default:'' }}">
+            </div>
+            <div class="staff-form-field is-full">
+              <label class="form-label">Telefono</label>
+              <input type="text" name="telefono" class="form-control" value="{{ usuario_obj.telefono|default:'' }}">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="{% url volver_url %}" class="btn btn-outline-secondary">Cancelar</a>
-      </div>
-    </form>
-  </div>
+        <div class="staff-form-section">
+          <div class="staff-form-section-header">
+            <h5>Permisos y acceso</h5>
+            <p>Define que tipo de tareas podra realizar y si la cuenta queda disponible para uso inmediato.</p>
+          </div>
+
+          <div class="staff-form-grid">
+            {% if solo_medicos %}
+            <input type="hidden" name="rol" value="medico">
+            {% else %}
+            <div class="staff-form-field">
+              <label class="form-label">Rol</label>
+              <select name="rol" id="id_rol" class="form-select">
+                {% for value, label in roles %}
+                <option value="{{ value }}" {% if usuario_obj.rol == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endif %}
+            <div class="staff-form-field{% if solo_medicos %} is-full{% endif %}" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
+              <label class="form-label">Especialidad</label>
+              <input type="text" name="especialidad" class="form-control" value="{{ usuario_obj.especialidad|default:'' }}">
+            </div>
+            <div class="staff-form-field{% if solo_medicos %} is-full{% endif %}" data-medico-only {% if not solo_medicos and usuario_obj.rol != 'medico' %}style="display:none;"{% endif %}>
+              <label class="form-label">Matricula</label>
+              <input type="text" name="matricula" class="form-control" value="{{ usuario_obj.matricula|default:'' }}">
+            </div>
+            <div class="staff-form-field">
+              <label class="form-label">{% if usuario_obj %}Nueva contraseña{% else %}Contraseña{% endif %}</label>
+              <input type="password" name="password" class="form-control" {% if not usuario_obj %}required{% endif %}>
+              <div class="staff-form-hint">{% if usuario_obj %}Dejar en blanco para conservar la actual.{% else %}La persona la usara para iniciar sesion.{% endif %}</div>
+            </div>
+            <div class="staff-form-field">
+              <div class="staff-form-toggle">
+                <div class="form-check">
+                  <input type="checkbox" name="is_active" class="form-check-input" id="id_is_active" {% if usuario_obj.is_active or not usuario_obj %}checked{% endif %}>
+                  <label class="form-check-label" for="id_is_active">Usuario activo</label>
+                </div>
+                <p class="staff-form-note mt-2">Las cuentas inactivas conservan sus datos pero no pueden ingresar al sistema.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="staff-form-actions">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <a href="{% url volver_url %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </section>
+
+      <aside class="staff-form-side">
+        <div class="staff-form-side-block">
+          <h6>Checklist rapido</h6>
+          <ul class="staff-form-list">
+            <li>Verifica que el usuario sea unico.</li>
+            <li>Confirma rol y estado antes de guardar.</li>
+            <li>Si es medico, carga especialidad y matricula.</li>
+          </ul>
+        </div>
+        <div class="staff-form-side-block">
+          <h6>Estado del registro</h6>
+          <p>
+            {% if usuario_obj %}
+            Estas actualizando un perfil existente. Si no cambias la contraseña, se mantiene la actual.
+            {% else %}
+            Estas creando un nuevo acceso. La contraseña inicial sera necesaria para el primer ingreso.
+            {% endif %}
+          </p>
+        </div>
+        <div class="staff-form-side-block">
+          <h6>Navegacion</h6>
+          <p>Si necesitas revisar otros perfiles o volver al panel administrativo, puedes salir sin perder consistencia visual del flujo.</p>
+          <div class="staff-form-actions mt-3">
+            <a href="{% url volver_url %}" class="btn btn-outline-secondary">Volver al listado</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </form>
 </div>
 {% endblock %}

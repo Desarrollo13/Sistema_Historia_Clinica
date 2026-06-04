@@ -105,8 +105,10 @@ def configuracion(request):
     usuarios = _base_user_queryset()
     return render(request, 'cuentas/configuracion.html', {
         'total_usuarios': usuarios.count(),
+        'total_admin': usuarios.filter(rol='admin', is_active=True).count(),
         'total_medicos': usuarios.filter(rol='medico', is_active=True).count(),
         'total_recepcion': usuarios.filter(rol='recepcion', is_active=True).count(),
+        'total_inactivos': usuarios.filter(is_active=False).count(),
     })
 
 
@@ -123,10 +125,15 @@ def lista_usuarios(request):
             Q(email__icontains=query)
         )
 
+    total_resultados = usuarios.count()
+
     return render(request, 'cuentas/gestion_usuarios.html', {
         'titulo': 'Usuarios del sistema',
         'usuarios': usuarios,
         'query': query,
+        'total_resultados': total_resultados,
+        'total_activos': usuarios.filter(is_active=True).count(),
+        'total_inactivos': usuarios.filter(is_active=False).count(),
         'crear_url': 'cuentas:nuevo_usuario',
         'editar_url': 'cuentas:editar_usuario',
         'volver_url': 'cuentas:configuracion',
@@ -147,10 +154,15 @@ def lista_medicos(request):
             Q(matricula__icontains=query)
         )
 
+    total_resultados = medicos.count()
+
     return render(request, 'cuentas/gestion_usuarios.html', {
         'titulo': 'Medicos',
         'usuarios': medicos,
         'query': query,
+        'total_resultados': total_resultados,
+        'total_activos': medicos.filter(is_active=True).count(),
+        'total_inactivos': medicos.filter(is_active=False).count(),
         'crear_url': 'cuentas:nuevo_medico',
         'editar_url': 'cuentas:editar_medico',
         'volver_url': 'cuentas:configuracion',

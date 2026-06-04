@@ -3,25 +3,228 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 {% block page_title %}{{ titulo }}{% endblock %}
 
+{% block extra_css %}
+<style>
+  .staff-shell {
+    display: grid;
+    gap: 20px;
+  }
+
+  .staff-toolbar,
+  .staff-summary,
+  .staff-table-card {
+    background: #fbfcfd;
+    border: 1px solid rgba(27, 42, 59, 0.08);
+    border-radius: 18px;
+  }
+
+  .staff-toolbar {
+    padding: 20px;
+  }
+
+  .staff-toolbar-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .staff-toolbar h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #1b2a3b;
+  }
+
+  .staff-toolbar p {
+    margin: 6px 0 0;
+    color: #5c6b78;
+  }
+
+  .staff-search {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .staff-search .form-control {
+    background: #f4f7f9;
+    border-color: rgba(27, 42, 59, 0.09);
+  }
+
+  .staff-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .staff-summary {
+    padding: 18px 20px;
+  }
+
+  .staff-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .staff-summary-item {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(27, 42, 59, 0.06);
+  }
+
+  .staff-summary-item span {
+    display: block;
+    color: #71808d;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+
+  .staff-summary-item strong {
+    display: block;
+    margin-top: 8px;
+    color: #1b2a3b;
+    font-size: 1.55rem;
+    line-height: 1;
+  }
+
+  .staff-table-card {
+    overflow: hidden;
+  }
+
+  .staff-table-card .table {
+    margin-bottom: 0;
+  }
+
+  .staff-table-card thead th {
+    background: #f3f6f8;
+    border-bottom-width: 1px;
+  }
+
+  .staff-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .staff-name strong {
+    color: #1b2a3b;
+    font-size: 0.95rem;
+  }
+
+  .staff-name small,
+  .staff-subtle {
+    color: #71808d;
+    font-size: 0.82rem;
+  }
+
+  .staff-role-badge,
+  .staff-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .staff-role-badge {
+    background: #eef3ff;
+    color: #1565c0;
+  }
+
+  .staff-status-badge.is-active {
+    background: #eef5f2;
+    color: #1a7a4a;
+  }
+
+  .staff-status-badge.is-inactive {
+    background: #f2f4f6;
+    color: #5c6b78;
+  }
+
+  @media (max-width: 991.98px) {
+    .staff-toolbar-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .staff-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .staff-search,
+    .staff-summary-grid {
+      grid-template-columns: 1fr;
+      display: grid;
+    }
+
+    .staff-search {
+      max-width: none;
+    }
+
+    .staff-search .btn,
+    .staff-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block contenido %}
-<div class="card mb-4">
-  <div class="card-body d-flex flex-wrap gap-3 justify-content-between align-items-center">
-    <form method="get" class="d-flex gap-2 flex-grow-1" style="max-width: 460px;">
+<div class="staff-shell">
+  <section class="staff-toolbar">
+    <div class="staff-toolbar-grid">
+      <div>
+        <h2>{{ titulo }}</h2>
+        <p>
+          {% if solo_medicos %}
+          Revisa credenciales, especialidades y estado administrativo del equipo medico.
+          {% else %}
+          Controla accesos, perfiles y disponibilidad del personal que usa la plataforma.
+          {% endif %}
+        </p>
+      </div>
+      <div class="staff-actions">
+        <a href="{% url volver_url %}" class="btn btn-outline-secondary">Volver</a>
+        <a href="{% url crear_url %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Nuevo registro
+        </a>
+      </div>
+    </div>
+
+    <form method="get" class="staff-search mt-3">
       <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre, usuario o dato relacionado">
       <button type="submit" class="btn btn-outline-secondary">Buscar</button>
     </form>
-    <div class="d-flex gap-2">
-      <a href="{% url volver_url %}" class="btn btn-outline-secondary">Volver</a>
-      <a href="{% url crear_url %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> Nuevo
-      </a>
-    </div>
-  </div>
-</div>
+  </section>
 
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
+  <section class="staff-summary">
+    <div class="staff-summary-grid">
+      <div class="staff-summary-item">
+        <span>Resultados</span>
+        <strong>{{ total_resultados }}</strong>
+      </div>
+      <div class="staff-summary-item">
+        <span>Activos</span>
+        <strong>{{ total_activos }}</strong>
+      </div>
+      <div class="staff-summary-item">
+        <span>Inactivos</span>
+        <strong>{{ total_inactivos }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="staff-table-card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
       <thead>
         <tr>
           <th>Nombre</th>
@@ -40,20 +243,30 @@
       <tbody>
         {% for usuario in usuarios %}
         <tr>
-          <td>{{ usuario.get_full_name|default:usuario.username }}</td>
-          <td>{{ usuario.username }}</td>
+          <td>
+            <div class="staff-name">
+              <strong>{{ usuario.get_full_name|default:usuario.username }}</strong>
+              <small>{{ usuario.telefono|default:'Sin telefono cargado' }}</small>
+            </div>
+          </td>
+          <td>
+            <div class="staff-name">
+              <strong>{{ usuario.username }}</strong>
+              <small>{{ usuario.email|default:'Sin email cargado' }}</small>
+            </div>
+          </td>
           {% if solo_medicos %}
-          <td>{{ usuario.especialidad|default:'-' }}</td>
-          <td>{{ usuario.matricula|default:'-' }}</td>
+          <td><span class="staff-subtle">{{ usuario.especialidad|default:'Sin especialidad' }}</span></td>
+          <td><span class="staff-subtle">{{ usuario.matricula|default:'Sin matricula' }}</span></td>
           {% else %}
-          <td>{{ usuario.get_rol_display }}</td>
-          <td>{{ usuario.email|default:'-' }}</td>
+          <td><span class="staff-role-badge">{{ usuario.get_rol_display }}</span></td>
+          <td><span class="staff-subtle">{{ usuario.email|default:'-' }}</span></td>
           {% endif %}
           <td>
             {% if usuario.is_active %}
-            <span class="badge text-bg-success">Activo</span>
+            <span class="staff-status-badge is-active">Activo</span>
             {% else %}
-            <span class="badge text-bg-secondary">Inactivo</span>
+            <span class="staff-status-badge is-inactive">Inactivo</span>
             {% endif %}
           </td>
           <td class="text-end">
@@ -66,7 +279,8 @@
         </tr>
         {% endfor %}
       </tbody>
-    </table>
-  </div>
+      </table>
+    </div>
+  </section>
 </div>
 {% endblock %}

@@ -42,3 +42,7 @@ backups/
 *.tmp
 *.bak
 *.orig
+AGENTS
+.agents
+.interface-design
+docs

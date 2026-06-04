@@ -3,50 +3,282 @@
 {% block titulo %}Configuracion{% endblock %}
 {% block page_title %}Configuracion{% endblock %}
 
-{% block contenido %}
-<div class="row g-4 mb-4">
-  <div class="col-md-4">
-    <div class="stat-card" style="background: linear-gradient(135deg, #1a7a4a, #23a36a);">
-      <div class="number">{{ total_usuarios }}</div>
-      <div class="label">Usuarios registrados</div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="stat-card" style="background: linear-gradient(135deg, #1565c0, #1e88e5);">
-      <div class="number">{{ total_medicos }}</div>
-      <div class="label">Medicos activos</div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="stat-card" style="background: linear-gradient(135deg, #5f6368, #7b8087);">
-      <div class="number">{{ total_recepcion }}</div>
-      <div class="label">Recepcionistas activos</div>
-    </div>
-  </div>
-</div>
+{% block extra_css %}
+<style>
+  .admin-shell {
+    display: grid;
+    gap: 24px;
+  }
 
-<div class="row g-4">
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-body p-4">
-        <h5 class="mb-2">Gestionar usuarios</h5>
-        <p class="text-muted mb-4">Alta y edicion de recepcionistas, administradores y otros usuarios del sistema.</p>
+  .admin-hero,
+  .admin-metric,
+  .admin-card {
+    background: #fbfcfd;
+    border: 1px solid rgba(27, 42, 59, 0.08);
+    border-radius: 18px;
+  }
+
+  .admin-hero {
+    padding: 28px;
+  }
+
+  .admin-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef5f2;
+    color: #1a7a4a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .admin-hero h2 {
+    margin: 16px 0 10px;
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+    color: #1b2a3b;
+  }
+
+  .admin-hero p {
+    max-width: 760px;
+    margin: 0;
+    color: #5c6b78;
+    line-height: 1.6;
+  }
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .admin-metric {
+    padding: 20px 22px;
+  }
+
+  .admin-metric-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #71808d;
+  }
+
+  .admin-metric-value {
+    margin-top: 10px;
+    font-size: 2rem;
+    line-height: 1;
+    font-weight: 700;
+    color: #1b2a3b;
+  }
+
+  .admin-metric-note {
+    margin-top: 10px;
+    color: #5c6b78;
+    font-size: 0.92rem;
+  }
+
+  .admin-metric.is-primary {
+    background: #f1f7f4;
+    border-color: rgba(26, 122, 74, 0.12);
+  }
+
+  .admin-metric.is-alert {
+    background: #fcfaf3;
+    border-color: rgba(183, 139, 38, 0.16);
+  }
+
+  .admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .admin-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    height: 100%;
+  }
+
+  .admin-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .admin-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf3ff;
+    color: #1565c0;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .admin-card.is-staff .admin-card-icon {
+    background: #eef5f2;
+    color: #1a7a4a;
+  }
+
+  .admin-card h5 {
+    margin: 0;
+    color: #1b2a3b;
+    font-size: 1.15rem;
+  }
+
+  .admin-card p {
+    margin: 8px 0 0;
+    color: #5c6b78;
+    line-height: 1.6;
+  }
+
+  .admin-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .admin-mini-stat {
+    padding: 14px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid rgba(27, 42, 59, 0.06);
+  }
+
+  .admin-mini-stat strong {
+    display: block;
+    font-size: 1.2rem;
+    color: #1b2a3b;
+  }
+
+  .admin-mini-stat span {
+    color: #71808d;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 991.98px) {
+    .admin-grid,
+    .admin-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .admin-hero {
+      padding: 22px;
+    }
+
+    .admin-hero h2 {
+      font-size: 1.6rem;
+    }
+
+    .admin-grid,
+    .admin-actions,
+    .admin-mini-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="admin-shell">
+  <section class="admin-hero">
+    <span class="admin-kicker"><i class="bi bi-shield-check"></i> Centro de control</span>
+    <h2>Administracion del equipo clinico</h2>
+    <p>
+      Supervisa accesos, disponibilidad del personal y configuracion operativa desde un panel mas claro y preparado para tareas rapidas.
+    </p>
+  </section>
+
+  <section class="admin-grid">
+    <article class="admin-metric is-primary">
+      <div class="admin-metric-label">Dotacion total</div>
+      <div class="admin-metric-value">{{ total_usuarios }}</div>
+      <div class="admin-metric-note">Usuarios registrados en la plataforma.</div>
+    </article>
+    <article class="admin-metric">
+      <div class="admin-metric-label">Medicos activos</div>
+      <div class="admin-metric-value">{{ total_medicos }}</div>
+      <div class="admin-metric-note">Profesionales habilitados para atender.</div>
+    </article>
+    <article class="admin-metric">
+      <div class="admin-metric-label">Recepcion activa</div>
+      <div class="admin-metric-value">{{ total_recepcion }}</div>
+      <div class="admin-metric-note">Personal operativo en admision y caja.</div>
+    </article>
+    <article class="admin-metric is-alert">
+      <div class="admin-metric-label">Cuentas inactivas</div>
+      <div class="admin-metric-value">{{ total_inactivos }}</div>
+      <div class="admin-metric-note">Revisa si hay accesos pendientes de reactivar.</div>
+    </article>
+  </section>
+
+  <section class="admin-actions">
+    <article class="admin-card is-staff">
+      <div class="admin-card-top">
+        <div>
+          <h5>Gestionar usuarios del sistema</h5>
+          <p>Alta y edicion de recepcionistas, administradores y perfiles generales con control de estado y datos de contacto.</p>
+        </div>
+        <span class="admin-card-icon"><i class="bi bi-people"></i></span>
+      </div>
+
+      <div class="admin-mini-stats">
+        <div class="admin-mini-stat">
+          <strong>{{ total_admin }}</strong>
+          <span>Administradores activos</span>
+        </div>
+        <div class="admin-mini-stat">
+          <strong>{{ total_usuarios }}</strong>
+          <span>Perfiles disponibles</span>
+        </div>
+      </div>
+
+      <div>
         <a href="{% url 'cuentas:lista_usuarios' %}" class="btn btn-primary">
-          <i class="bi bi-people me-1"></i> Abrir usuarios
+          <i class="bi bi-arrow-up-right-circle me-1"></i> Abrir gestion de usuarios
         </a>
       </div>
-    </div>
-  </div>
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-body p-4">
-        <h5 class="mb-2">Gestionar medicos</h5>
-        <p class="text-muted mb-4">Carga simple de medicos con especialidad, matricula y estado activo.</p>
+    </article>
+
+    <article class="admin-card">
+      <div class="admin-card-top">
+        <div>
+          <h5>Gestionar medicos</h5>
+          <p>Organiza especialidades, matriculas y disponibilidad administrativa del plantel medico desde una vista centrada en credenciales.</p>
+        </div>
+        <span class="admin-card-icon"><i class="bi bi-person-badge"></i></span>
+      </div>
+
+      <div class="admin-mini-stats">
+        <div class="admin-mini-stat">
+          <strong>{{ total_medicos }}</strong>
+          <span>Medicos activos</span>
+        </div>
+        <div class="admin-mini-stat">
+          <strong>{{ total_inactivos }}</strong>
+          <span>Cuentas inactivas totales</span>
+        </div>
+      </div>
+
+      <div>
         <a href="{% url 'cuentas:lista_medicos' %}" class="btn btn-primary">
-          <i class="bi bi-person-badge me-1"></i> Abrir medicos
+          <i class="bi bi-arrow-up-right-circle me-1"></i> Abrir gestion medica
         </a>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 </div>
 {% endblock %}
