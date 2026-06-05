@@ -1,3 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 # Entorno virtual
 venv/
 
@@ -5,44 +11,39 @@ venv/
 .env
 .env.*
 
-# Base de datos
+# Base de datos local
 db.sqlite3
 *.sqlite3
 
-# Archivos de Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Cache y reportes
 .pytest_cache/
 .mypy_cache/
 .coverage
 htmlcov/
 
-# Archivos de logs
+# Logs y temporales
 *.log
-
-# Archivos de sistema
-.DS_Store
-Thumbs.db
-
-# Archivos de editor
-.vscode/
-.idea/
-
-# Archivos estáticos recolectados
-staticfiles/
-
-# Media y backups locales
-media/
-backups/
-
-# Archivos temporales
 *.swp
 *.tmp
 *.bak
 *.orig
-AGENTS
-.agents
-.interface-design
-docs
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Salidas locales del proyecto
+staticfiles/
+media/
+backups/
+
+# Archivos locales de desarrollo
+AGENTS.md
+.agents/
+.interface-design/
+docs/
+backup_db.bat
+iniciar_servidor_lan.bat
+setup.py
