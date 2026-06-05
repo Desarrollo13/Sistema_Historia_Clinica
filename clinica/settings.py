@@ -20,6 +20,16 @@ def env_list(name, default=''):
     return [item.strip() for item in value.split(',') if item.strip()]
 
 
+def env_int(name, default=0):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
 SECRET_KEY = os.getenv('CLINICA_SECRET_KEY', 'django-insecure-clinica-local-change-me-in-production')
 
 # Para uso LAN real, dejar DEBUG apagado y cargar hosts/IPs permitidos desde entorno.
@@ -74,12 +84,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'clinica.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+db_engine = os.getenv('CLINICA_DB_ENGINE', 'sqlite3').strip().lower()
+
+if db_engine == 'postgresql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('CLINICA_DB_NAME', 'clinica'),
+            'USER': os.getenv('CLINICA_DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('CLINICA_DB_PASSWORD', ''),
+            'HOST': os.getenv('CLINICA_DB_HOST', '127.0.0.1'),
+            'PORT': env_int('CLINICA_DB_PORT', 5432),
+            'CONN_MAX_AGE': env_int('CLINICA_DB_CONN_MAX_AGE', 60),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

@@ -51,6 +51,10 @@ def registrar_pago(request, turno_id):
     if hasattr(turno, 'pago'):
         return redirect('facturacion:ticket', pago_id=turno.pago.pk)
 
+    if turno.estado != 'finalizado':
+        messages.error(request, 'Solo se pueden registrar pagos de turnos finalizados.')
+        return redirect('facturacion:lista')
+
     # Datos del médico para el concepto por defecto
     medico = turno.medico
     concepto_default = f"Consulta médica"

@@ -109,13 +109,13 @@ def nueva_historia(request, turno_id):
     })
 
 
-@login_required
+@solo_medico
 def ver_historia(request, historia_id):
     historia = get_object_or_404(HistoriaClinica, pk=historia_id)
     return render(request, 'consulta/ver_historia.html', {'historia': historia})
 
 
-@login_required
+@solo_medico
 def receta_pdf(request, historia_id):
     historia = get_object_or_404(HistoriaClinica, pk=historia_id)
     pdf_bytes = generar_receta_pdf(historia)

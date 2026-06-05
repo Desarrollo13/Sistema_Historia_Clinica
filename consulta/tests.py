@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from consulta.models import HistoriaClinica, RecetaMedicamento, Turno
 from pacientes.models import Paciente, SignosVitales
@@ -87,3 +90,42 @@ class ConsultaWorkflowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
         self.assertIn(f'receta_{historia.pk}.pdf', response['Content-Disposition'])
+
+    def test_recepcion_cannot_view_historia_or_receta(self):
+        recepcion = self.user_model.objects.create_user(
+            username='recepcion1',
+            password='clave123',
+            rol='recepcion',
+        )
+        historia = HistoriaClinica.objects.create(
+            turno=self.turno,
+            medico=self.medico,
+            anamnesis='Texto',
+            examen_fisico='Texto',
+            diagnostico_principal='Diagnostico',
+            tratamiento='Tratamiento',
+        )
+        self.client.force_login(recepcion)
+
+        response_historia = self.client.get(reverse('consulta:ver_historia', args=[historia.pk]))
+        response_receta = self.client.get(reverse('consulta:receta_pdf', args=[historia.pk]))
+
+        self.assertRedirects(response_historia, '/', fetch_redirect_response=False)
+        self.assertRedirects(response_receta, '/', fetch_redirect_response=False)
+
+    def test_turno_numbers_are_sequential_per_turno_date(self):
+        turno_hoy = Turno.objects.create(
+            paciente=self.paciente,
+            medico=self.medico,
+            estado='programado',
+            fecha_hora=timezone.now(),
+        )
+        turno_manana = Turno.objects.create(
+            paciente=self.paciente,
+            medico=self.medico,
+            estado='programado',
+            fecha_hora=timezone.now() + timedelta(days=1),
+        )
+
+        self.assertEqual(turno_hoy.numero, 2)
+        self.assertEqual(turno_manana.numero, 1)

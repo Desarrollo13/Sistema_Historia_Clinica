@@ -1,5 +1,17 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
+
+
+class ReciboCounter(models.Model):
+    clave = models.CharField(max_length=20, unique=True, default='global')
+    ultimo_numero = models.PositiveIntegerField(default=999)
+
+    class Meta:
+        verbose_name = 'Contador de recibos'
+        verbose_name_plural = 'Contadores de recibos'
+
+    def __str__(self):
+        return f"{self.clave}: {self.ultimo_numero}"
 
 
 class Pago(models.Model):
@@ -32,6 +44,13 @@ class Pago(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.nro_recibo:
-            ultimo = Pago.objects.order_by('nro_recibo').last()
-            self.nro_recibo = (ultimo.nro_recibo + 1) if ultimo else 1000
+            with transaction.atomic():
+                counter, _ = ReciboCounter.objects.select_for_update().get_or_create(
+                    clave='global',
+                    defaults={'ultimo_numero': 999},
+                )
+                counter.ultimo_numero += 1
+                counter.save(update_fields=['ultimo_numero'])
+                self.nro_recibo = counter.ultimo_numero
+                return super().save(*args, **kwargs)
         super().save(*args, **kwargs)

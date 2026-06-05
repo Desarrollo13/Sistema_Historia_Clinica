@@ -1,5 +1,17 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
+
+
+class TurnoDiarioCounter(models.Model):
+    fecha = models.DateField(unique=True)
+    ultimo_numero = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Contador diario de turnos'
+        verbose_name_plural = 'Contadores diarios de turnos'
+
+    def __str__(self):
+        return f"{self.fecha}: {self.ultimo_numero}"
 
 
 class Turno(models.Model):
@@ -47,11 +59,24 @@ class Turno(models.Model):
     def __str__(self):
         return f"Turno #{self.numero} — {self.paciente} [{self.get_estado_display()}]"
 
+    def _fecha_para_numeracion(self):
+        fecha_hora = self.fecha_hora or timezone.now()
+        if timezone.is_aware(fecha_hora):
+            fecha_hora = timezone.localtime(fecha_hora)
+        return fecha_hora.date()
+
     def save(self, *args, **kwargs):
         if not self.numero:
-            hoy = timezone.now().date()
-            ultimo = Turno.objects.filter(fecha_hora__date=hoy).order_by('numero').last()
-            self.numero = (ultimo.numero + 1) if ultimo else 1
+            fecha_turno = self._fecha_para_numeracion()
+            with transaction.atomic():
+                counter, _ = TurnoDiarioCounter.objects.select_for_update().get_or_create(
+                    fecha=fecha_turno,
+                    defaults={'ultimo_numero': 0},
+                )
+                counter.ultimo_numero += 1
+                counter.save(update_fields=['ultimo_numero'])
+                self.numero = counter.ultimo_numero
+                return super().save(*args, **kwargs)
         super().save(*args, **kwargs)
 
 

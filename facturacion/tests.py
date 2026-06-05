@@ -58,3 +58,36 @@ class FacturacionFlowTests(TestCase):
         self.assertRedirects(response, '/', fetch_redirect_response=False)
         messages = list(response.wsgi_request._messages)
         self.assertTrue(any('No tienes permiso' in str(message) for message in messages))
+
+    def test_no_se_puede_facturar_turno_no_finalizado(self):
+        self.turno.estado = 'espera'
+        self.turno.save(update_fields=['estado'])
+
+        response = self.client.post(reverse('facturacion:registrar', args=[self.turno.pk]), {
+            'concepto': 'Consulta Clinica medica',
+            'monto': '15000.50',
+            'forma_pago': 'efectivo',
+        })
+
+        self.assertRedirects(response, reverse('facturacion:lista'))
+        self.assertEqual(Pago.objects.count(), 0)
+
+    def test_receipt_numbers_are_sequential(self):
+        otro_paciente = Paciente.objects.create(
+            dni='30999877',
+            apellido='Moyano',
+            nombre='Elena',
+            fecha_nacimiento='1991-03-20',
+            sexo='F',
+        )
+        otro_turno = Turno.objects.create(
+            paciente=otro_paciente,
+            medico=self.medico,
+            estado='finalizado',
+        )
+
+        primer_pago = Pago.objects.create(turno=self.turno, monto='1000', forma_pago='efectivo')
+        segundo_pago = Pago.objects.create(turno=otro_turno, monto='2000', forma_pago='transferencia')
+
+        self.assertEqual(primer_pago.nro_recibo, 1000)
+        self.assertEqual(segundo_pago.nro_recibo, 1001)
